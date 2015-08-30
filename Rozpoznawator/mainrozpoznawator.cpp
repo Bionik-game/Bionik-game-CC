@@ -1,8 +1,15 @@
 #include "mainrozpoznawator.h"
 
+const int FRAME_WIDTH = 1280;
+const int FRAME_HEIGHT = 720;
+
 MainRozpoznawator::MainRozpoznawator()
     : rythm(this), robotPositionX(30)
 {
+    cameraCapture.open(0);
+    cameraCapture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
+    cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
+
     /**
      * Wystartowanie zegara z czasem 0 powoduje jego natychmiastowe
      * włączanie kiedy tylko nie ma żadnych innych zdarzeń

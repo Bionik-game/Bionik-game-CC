@@ -17,6 +17,8 @@ QT5_WRAP_UI(GUI_UI
 set (Rozpoznawator_SRC
     Rozpoznawator/mainrozpoznawator.cpp
     Rozpoznawator/mainrozpoznawator.h
+    Rozpoznawator/rozpoznawator_functions.h
+    Rozpoznawator/rozpoznawator_functions.cpp
 )
 
 set (Klocki_SRC
