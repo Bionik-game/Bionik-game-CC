@@ -1,6 +1,16 @@
 #include <iostream>
 #include <QApplication>
 #include <QObject>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/video.hpp>
+#include <opencv2/videoio.hpp>
+
+#include <aruco/aruco.h>
+#include <aruco/cvdrawingutils.h>
+
 #include "GUI/mainwindow.h"
 #include "Rozpoznawator/mainrozpoznawator.h"
 #include "Sterowanie_klocki/mainklocki.h"
@@ -55,7 +65,7 @@ int main(int argc, char *argv[])
      * exec, która obsługuję pętlę zdarzeń.
      */
     rozpoznawator.start();
-    klocki.start();
+  //  klocki.start();
 
     /**
      * Wyświetlanie okna interfejsu użytkownika
@@ -75,7 +85,7 @@ int main(int argc, char *argv[])
      * należy poczekać na zakończenie wywołanych wątków.
      */
     rozpoznawator.wait();
-    klocki.wait();
+  //  klocki.wait();
 
     return appReturnValue;
 }

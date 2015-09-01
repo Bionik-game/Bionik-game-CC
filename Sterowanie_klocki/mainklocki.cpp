@@ -20,7 +20,7 @@ void MainKlocki::processData()
 
 
 
-void MainKlocki::updateRobotPosition(RobotPosition robotPosition)
+void MainKlocki::updateRobotPosition(std::vector<RobotPosition> robotPosition)
 {
     dataCollector.set(0, robotPosition);
 }

@@ -26,7 +26,7 @@ private slots:
     void processData();
 
 public slots:
-    void updateRobotPosition(RobotPosition robotPosition);
+    void updateRobotPosition(std::vector<RobotPosition> robotPosition);
     void updateBoxesPositions(std::vector<ColorBoxPosition> boxesPositionVector);
 };
 
