@@ -1,19 +1,23 @@
 #include "mapelements.h"
 
-#include <iostream>
-RobotPosition::RobotPosition(unsigned long xCentimeters, unsigned long yCentimeters, float rotationRadians)
-    : xCentimeters(xCentimeters), yCentimeters(yCentimeters), rotationRadians(rotationRadians)
+/**
+ * Poniższa funkcja musi być wywołana, aby klasy mogły być przesyłane w sygnałach
+ */
+void registerMetaTypes()
 {
-}
-
-
-ColorBoxPosition::ColorBoxPosition(unsigned long xCentimeters, unsigned long yCentimeters, ColorBoxPosition::Color color)
-    : xCentimeters(xCentimeters), yCentimeters(yCentimeters), color(color)
-{
-}
-
-
-RobotCommands::RobotCommands(double xCentimetersPerSecond, double yCentimetersPerSecond, double zRadiansPerSecond)
-    : xCentimetersPerSecond(xCentimetersPerSecond), yCentimetersPerSecond(yCentimetersPerSecond), zRadiansPerSecond(zRadiansPerSecond)
-{
+    static bool unregistered = true;
+    if (unregistered)
+    {
+        qRegisterMetaType<Robot>("Robot");
+        qRegisterMetaType<ColorBox>("ColorBox");
+        qRegisterMetaType<RobotCommands>("RobotCommands");
+        qRegisterMetaType<BoardIndicator>("BoardIndicator");
+        qRegisterMetaType<RobotGoal>("RobotGoal");
+        qRegisterMetaType<std::vector<Robot>>("std::vector<Robot>");
+        qRegisterMetaType<std::vector<ColorBox>>("std::vector<ColorBox>");
+        qRegisterMetaType<std::vector<RobotCommands>>("std::vector<RobotCommands>");
+        qRegisterMetaType<std::vector<BoardIndicator>>("std::vector<BoardIndicator>");
+        qRegisterMetaType<std::vector<RobotGoal>>("std::vector<RobotGoal>");
+        unregistered = false;
+    }
 }

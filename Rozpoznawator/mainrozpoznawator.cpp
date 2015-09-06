@@ -1,4 +1,5 @@
 #include "mainrozpoznawator.h"
+#include <QThread>
 
 MainRozpoznawator::MainRozpoznawator()
     : rythm(this), robotPositionX(30)
@@ -12,31 +13,34 @@ MainRozpoznawator::MainRozpoznawator()
     rythm.start(0);
 }
 
-void MainRozpoznawator::updateRobotPosition()
+std::vector<Robot> MainRozpoznawator::updateRobotPosition()
 {
-    RobotPosition robotPosition = {robotPositionX, 40, 2.3};
-    emit robotPositionUpdate(robotPosition);
+    std::vector<Robot> robots;
 
+    Robot robotPosition = {1, robotPositionX, 40, 2.3};
     robotPositionX+= 1;
+
+    robots.push_back(robotPosition);
+    return robots;
 }
 
-void MainRozpoznawator::updateBoxesPositions()
+std::vector<ColorBox> MainRozpoznawator::updateBoxesPositions()
 {
-    std::vector<ColorBoxPosition> boxesPositionVector;
+    std::vector<ColorBox> boxesPositionVector;
     for (int i = 0; i < 10; i++)
     {
         if (i%2)
         {
-            ColorBoxPosition colorBoxPosition = {i+10, i*2, ColorBoxPosition::BLUE};
+            ColorBox colorBoxPosition = {ColorBox::BLUE, (const unsigned long) i+10, (const unsigned long)  i*2, 1.5};
             boxesPositionVector.push_back(colorBoxPosition);
         }
         else
         {
-            ColorBoxPosition colorBoxPosition = {2*i+50, i+9, ColorBoxPosition::GREEN};
+            ColorBox colorBoxPosition = {ColorBox::GREEN, (const unsigned long) 2*i+50, (const unsigned long) i+9, 1.0};
             boxesPositionVector.push_back(colorBoxPosition);
         }
     }
-    emit boxesPositionUpdate(boxesPositionVector);
+    return boxesPositionVector;
 }
 
 void MainRozpoznawator::mainWork()
@@ -44,7 +48,6 @@ void MainRozpoznawator::mainWork()
     int sleepTime = 100 + qrand()%900;
     QThread::msleep(sleepTime);
 
-    updateRobotPosition();
-    updateBoxesPositions();
+    emit gameState(updateRobotPosition(), updateBoxesPositions());
 }
 

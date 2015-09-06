@@ -1,14 +1,12 @@
 #ifndef MAINROZPOZNAWATOR_H
 #define MAINROZPOZNAWATOR_H
 
-#include <vector>
-
-#include <QThread>
+#include <QVector>
 #include <QTimer>
 
 #include "Common-utils/mapelements.h"
 
-class MainRozpoznawator : public QThread
+class MainRozpoznawator : public QObject
 {
     Q_OBJECT
 
@@ -20,12 +18,11 @@ public:
     MainRozpoznawator();
 
 private:
-    void updateRobotPosition();
-    void updateBoxesPositions();
+    std::vector<Robot> updateRobotPosition();
+    std::vector<ColorBox> updateBoxesPositions();
 
 signals:
-    void robotPositionUpdate(RobotPosition robotPosition);
-    void boxesPositionUpdate(std::vector<ColorBoxPosition> boxesPositionVector);
+    void gameState(std::vector<Robot> robotsinfo, std::vector<ColorBox> colorBoxesInfo);
 
 private slots:
     void mainWork();
