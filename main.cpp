@@ -44,6 +44,11 @@ int main(int argc, char *argv[])
     QObject::connect(&window, &MainWindow::quittingApplication, &klocki, &MainKlocki::quit);
 
     /**
+     * Połączenia pomiędzy przyciskami w GUI a funkcjami Rozpoznawatora
+     */
+    QObject::connect(&window, &MainWindow::startColourConfiguration, &rozpoznawator,&MainRozpoznawator::colourCalibration);
+    QObject::connect(&window, &MainWindow::startBoardConfiguration, &rozpoznawator,&MainRozpoznawator::boardConfiguration);
+    /**
      * Łączenie danych między wątkami
      */
     QObject::connect(&rozpoznawator, &MainRozpoznawator::robotPositionUpdate, &klocki, &MainKlocki::updateRobotPosition);

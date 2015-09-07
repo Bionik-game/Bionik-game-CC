@@ -1,13 +1,13 @@
 #include "mapelements.h"
 
 #include <iostream>
-RobotPosition::RobotPosition(unsigned long xCentimeters, unsigned long yCentimeters, float rotationRadians)
+RobotPosition::RobotPosition( long xCentimeters,  long yCentimeters, float rotationRadians)
     : xCentimeters(xCentimeters), yCentimeters(yCentimeters), rotationRadians(rotationRadians)
 {
 }
 
 
-ColorBoxPosition::ColorBoxPosition(unsigned long xCentimeters, unsigned long yCentimeters, ColorBoxPosition::Color color)
+ColorBoxPosition::ColorBoxPosition( long xCentimeters,  long yCentimeters, ColorBoxPosition::Color color)
     : xCentimeters(xCentimeters), yCentimeters(yCentimeters), color(color)
 {
 }

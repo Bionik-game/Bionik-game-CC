@@ -4,18 +4,18 @@
 
 struct RobotPosition
 {
-    const unsigned long xCentimeters;
-    const unsigned long yCentimeters;
+    const long xCentimeters;
+    const long yCentimeters;
     const float rotationRadians;
-    RobotPosition(unsigned long xCentimeters, unsigned long yCentimeters, float rotationRadians);
+    RobotPosition( long xCentimeters, long yCentimeters, float rotationRadians);
 };
 
 struct ColorBoxPosition
 {
     const enum Color {RED, GREEN, BLUE} color;
-    const unsigned long xCentimeters;
-    const unsigned long yCentimeters;
-    ColorBoxPosition(unsigned long xCentimeters, unsigned long yCentimeters, Color color);
+    const long xCentimeters;
+    const long yCentimeters;
+    ColorBoxPosition( long xCentimeters, long yCentimeters, Color color);
 };
 
 struct RobotCommands

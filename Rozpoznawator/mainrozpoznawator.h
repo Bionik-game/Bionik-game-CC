@@ -27,11 +27,22 @@ class MainRozpoznawator : public QThread
 {
     Q_OBJECT
 
+public:
+    const unsigned int robot1Id = 1000;
+    const unsigned int robot2Id = 500;
+    const unsigned int topLeftBoardId = 678;
+    const unsigned int topRightBoardId = 495;
+    const unsigned int bottomLeftBoardId = 233;
+    const unsigned int bottomRightBoardId = 341;
+
+
 private:
     QTimer rythm;
     unsigned long robotPositionX;
     cv::VideoCapture cameraCapture;
     cv::Mat cameraFrame;
+
+    bool calibrationOn;
 
     vector<Block> block_types;
     vector<ColorBoxPosition> boxesPosition;
@@ -44,20 +55,31 @@ private:
     cv::Mat drawFrame;
 #endif
 
-    const unsigned int robot1Id = 1000;
-    const unsigned int robot2Id = 500;
-    const unsigned int topLeftBoardId = 678;
-    const unsigned int topRightBoardId = 495;
-    const unsigned int bottomLeftBoardId = 235;
-    const unsigned int bottomRightBoardId = 341;
+
+
+
+
+    unsigned int centerX;
+    unsigned int centerY;
 
     unsigned int minColRange;
     unsigned int maxColRange;
     unsigned int minRowRange;
     unsigned int maxRowRange;
 
+
 public:
     MainRozpoznawator();
+
+    aruco::MarkerDetector detector() const;
+
+    void setMinColRange(unsigned int value);
+
+    void setMaxColRange(unsigned int value);
+
+    void setMinRowRange(unsigned int value);
+
+    void setMaxRowRange(unsigned int value);
 
 private:
     void updateRobotPosition();
@@ -68,17 +90,24 @@ private:
     void trackFilteredObject(vector<Block>* blocks, Block theBlock, cv::Mat threshold,
            cv::Mat HSV, cv::Mat &cameraFeed);
     void crop2Board();
-    void findBoardPos();
+    void findBoardPos(cv::Mat*  cameraFeed);
 
-#ifdef DEBUG
+
     void drawObject(vector<Block> theBlocks, cv::Mat &frame);
-#endif
+    void drawCross( cv::Mat* frame );
+
 signals:
     void robotPositionUpdate(std::vector<RobotPosition> robotPosition);
     void boxesPositionUpdate(std::vector<ColorBoxPosition> boxesPositionVector);
 
+public slots:
+    void colourCalibration();
+    void boardConfiguration();
+
 private slots:
     void mainWork();
+
 };
 
 #endif // MAINROZPOZNAWATOR_H
+

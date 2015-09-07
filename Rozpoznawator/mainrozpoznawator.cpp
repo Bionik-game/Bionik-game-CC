@@ -1,24 +1,47 @@
 #include "mainrozpoznawator.h"
 
-const int FRAME_WIDTH = 1280;
-const int FRAME_HEIGHT = 720;
+const int FRAME_WIDTH = 640;
+const int FRAME_HEIGHT = 480;
 
 using namespace  cv;
 using namespace aruco;
 
 
+aruco::MarkerDetector MainRozpoznawator::detector() const
+{
+    return mDetector;
+}
+
+void MainRozpoznawator::setMinColRange(unsigned int value)
+{
+    minColRange = value;
+}
+
+void MainRozpoznawator::setMaxColRange(unsigned int value)
+{
+    maxColRange = value;
+}
+
+void MainRozpoznawator::setMinRowRange(unsigned int value)
+{
+    minRowRange = value;
+}
+
+void MainRozpoznawator::setMaxRowRange(unsigned int value)
+{
+    maxRowRange = value;
+}
+
 MainRozpoznawator::MainRozpoznawator()
     : rythm(this), robotPositionX(30)
 {
+    /////////////////////// Camera capture setup
     this->cameraCapture.open(0);
     //set height and width of capture frame
     cameraCapture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
     cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
+    ////////////////////////////////////////////////////////////////
 
-    //////////////////////// Crop2Board
-    this->cameraCapture.read(cameraFrame);
-    //findBoardPos();
-    ////////////////////////
 
 #ifdef DEBUG
     namedWindow(windowName, 1);
@@ -38,6 +61,15 @@ MainRozpoznawator::MainRozpoznawator()
     this->mDetector.setDesiredSpeed(3);
     ////////////////////////////////////////////////////////////////
 
+    ////////////////////// Other values setup
+    this->centerY = FRAME_HEIGHT/2;
+    this->centerX = FRAME_WIDTH/2;
+
+    this->minColRange = 0;
+    this->minRowRange = 0;
+    this->maxColRange = FRAME_WIDTH;
+    this->maxRowRange = FRAME_HEIGHT;
+    ////////////////////////////////////////////////////////////////
 
     /**
      * Wystartowanie zegara z czasem 0 powoduje jego natychmiastowe
@@ -60,36 +92,7 @@ void MainRozpoznawator::updateBoxesPositions()
     emit boxesPositionUpdate(this->boxesPosition);
 }
 
-void MainRozpoznawator::findBoardPos(){
 
-    vector<Marker> markers;
-    this->mDetector.detect(this->cameraFrame,markers);
-
-    Marker topLeft, topRight, bottomLeft, bottomRight;
-
-    for (unsigned int i=0;i<markers.size();i++) {
-        if( markers.at(i).id == this->topLeftBoardId ){
-            topLeft = markers.at(i);
-        }else if( markers.at(i).id == this->topRightBoardId ){
-            topLeft = markers.at(i);
-        }else if( markers.at(i).id == this->bottomLeftBoardId ){
-            bottomLeft = markers.at(i);
-        }else if( markers.at(i).id == this->bottomRightBoardId ){
-            bottomRight = markers.at(i);
-        }
-    }
-
-
-    this->minColRange = (topLeft[0].y < bottomLeft[0].y) ? topLeft[0].y : bottomLeft[0].y;
-    this->minRowRange = (topLeft[0].x < topRight[1].x) ? topLeft[0].x : topRight[1].x;
-    this->maxColRange = (topRight[1].y > bottomRight[2].y) ? topRight[1].y : bottomRight[2].y;
-    this->maxRowRange = (bottomLeft[2].x > bottomRight[2].x) ? bottomLeft[2].x : bottomRight[2].x;
-}
-
-void MainRozpoznawator::crop2Board(){
-    this->cameraFrame = this->cameraFrame.colRange(this->minColRange,this->maxColRange);
-    this->cameraFrame = this->cameraFrame.rowRange(this->minRowRange,this->maxRowRange);
-}
 
 void MainRozpoznawator::findBoxes(){
 
@@ -103,7 +106,7 @@ void MainRozpoznawator::findBoxes(){
 
 
 
-    flip(cameraFeed, cameraFeed, 1);
+
 
     // Run through all types of blocks and find them on the image
     cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
@@ -135,11 +138,12 @@ void MainRozpoznawator::findBoxes(){
         }else if(all_blocks.at(i).getType()=="yellow_block"){
 
         }
-        boxesPosition.push_back(ColorBoxPosition(all_blocks.at(i).getXPos(),all_blocks.at(i).getYPos(),color));
+        this->boxesPosition.push_back(ColorBoxPosition(all_blocks.at(i).getXPos()-centerX ,all_blocks.at(i).getYPos() - centerY ,color));
     }
 
+#ifdef DEBUG
     drawObject(all_blocks, drawFrame);
-
+#endif
 
 
 }
@@ -214,6 +218,7 @@ void MainRozpoznawator::trackFilteredObject(vector<Block>* blocks, Block theBloc
     }
 }
 
+
 void MainRozpoznawator::drawObject(vector<Block> theBlocks, Mat &frame) {
 
     for (unsigned int i = 0; i < theBlocks.size(); i++) {
@@ -233,6 +238,7 @@ void MainRozpoznawator::drawObject(vector<Block> theBlocks, Mat &frame) {
                 theBlocks.at(i).getColour());
     }
 }
+
 
 double calculate_angle(Marker marker) {
 
@@ -257,6 +263,7 @@ double calculate_angle(Marker marker) {
 
 void MainRozpoznawator::findRobots() {
     //Detecting AR markers //
+
     vector<Marker> markers;
     this->mDetector.detect(this->cameraFrame,markers);
     double angle = 0;
@@ -265,7 +272,7 @@ void MainRozpoznawator::findRobots() {
     for (unsigned int i=0;i<markers.size();i++) {
         if( markers.at(i).id == this->robot1Id ){
             angle  = calculate_angle(markers[i]);
-            this->robotsPosition.push_back(RobotPosition( markers.at(i).getCenter().x, markers.at(i).getCenter().y, angle));
+            this->robotsPosition.push_back(RobotPosition( markers.at(i).getCenter().x - this->centerX, markers.at(i).getCenter().y - centerY, angle));
 #ifdef DEBUG
             putText(this->drawFrame, to_string(180 * angle / M_PI),    //draw marker info and its boundaries in the image
                     cv::Point(markers[i][0].x,
@@ -289,22 +296,312 @@ void MainRozpoznawator::findRobots() {
 
 }
 
+struct colourCalibCallbackData {
+    Mat cameraFeed;
+    unsigned int* colours_calibrated;
+    fstream* file;
+} ;
+
+
+void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {
+
+
+
+
+    if (event == EVENT_LBUTTONDOWN) {
+        int margin = 20;
+        int h_colour_tolerance = 10;
+        int s_colour_tolerance = 100;
+        int v_colour_tolerance = 100;
+
+        colourCalibCallbackData* callback_data = (colourCalibCallbackData*) userdata;
+        Mat cameraFeed = callback_data->cameraFeed;
+        unsigned int* colours_calibrated = callback_data->colours_calibrated;
+        fstream* file = callback_data->file;
+
+#ifdef DEBUG
+        cout << "Left button of the mouse is clicked - position (" << x << ", "
+                << y << ")" << endl;
+#endif
+
+
+        // Calculate the borders of the area around the mouse click point
+        int minMarginX = x - margin;
+        if (minMarginX <= 0)
+            minMarginX = 0;
+        int minMarginY = y - margin;
+        if (minMarginY <= 0)
+            minMarginY = 0;
+        int maxMarginX = x + margin;
+        if (maxMarginX > FRAME_WIDTH)
+            maxMarginX = FRAME_WIDTH;
+        int maxMarginY = y + margin;
+        if (maxMarginY > FRAME_HEIGHT)
+            maxMarginY = FRAME_HEIGHT;
+
+
+        Mat croppedFeed = cameraFeed.colRange(minMarginX, maxMarginX);
+        croppedFeed = croppedFeed.rowRange(minMarginY, maxMarginY);
+
+        typedef cv::Point3_<uint8_t> Pixel;
+
+        int hChannelSum = 0;
+        int sChannelSum = 0;
+        int vChannelSum = 0;
+
+
+        // Calculate mean value of base colours, by summing these values from each pixel and dividing by a number of pixels
+        for (int r = 0; r < croppedFeed.rows; ++r) {
+            Pixel* ptr = croppedFeed.ptr < Pixel > (r, 0);
+            const Pixel* ptr_end = ptr + croppedFeed.cols;
+            for (; ptr != ptr_end; ++ptr) {
+                hChannelSum += ptr->x;
+                sChannelSum += ptr->y;
+                vChannelSum += ptr->z;
+            }
+        }
+
+        hChannelSum = hChannelSum/(croppedFeed.rows * croppedFeed.cols);
+        sChannelSum = sChannelSum/(croppedFeed.rows * croppedFeed.cols);
+        vChannelSum = vChannelSum/(croppedFeed.rows * croppedFeed.cols);
+        // End of calculating mean values
+
+        int hChannelMin = (hChannelSum - h_colour_tolerance) > 0 ? (hChannelSum - h_colour_tolerance) : 0;
+        int sChannelMin = (sChannelSum - s_colour_tolerance) > 0 ? (sChannelSum - s_colour_tolerance) : 0;
+        int vChannelMin = (vChannelSum - v_colour_tolerance) > 0 ? (vChannelSum - v_colour_tolerance) : 0;
+
+        int hChannelMax = (hChannelSum + h_colour_tolerance) < 256 ? (hChannelSum + h_colour_tolerance) : 256;
+
+        int sChannelMax = (sChannelSum + s_colour_tolerance) < 256 ? (sChannelSum + s_colour_tolerance) : 256;
+        int vChannelMax = (vChannelSum + v_colour_tolerance) < 256 ? (vChannelSum + v_colour_tolerance) : 256;
+
+
+        *file << hChannelMin << endl;
+        *file << sChannelMin << endl;
+        *file << vChannelMin << endl;
+        *file << hChannelMax << endl;
+        *file << sChannelMax << endl;
+        *file << vChannelMax << endl;
+
+
+        cout << hChannelSum << " " << sChannelSum << " " << vChannelSum << endl;
+        imshow("Cropped", croppedFeed);
+        *colours_calibrated += 1;
+
+    }
+}
+
+void MainRozpoznawator::colourCalibration() {
+
+
+    Mat cameraFeed;
+    Mat HSV;
+    unsigned int colours_calibrated = 0;
+
+    fstream file;
+    file.open("colour_data.txt", ios::out);
+
+    namedWindow("Calibration", 1);
+    namedWindow("Cropped", 1);
+
+    colourCalibCallbackData callback_data;
+
+
+    callback_data.colours_calibrated = &colours_calibrated;
+    callback_data.file = &file;
+
+    setMouseCallback("Calibration", colourCalibCallback, &callback_data);
+
+    while ( colours_calibrated < this->block_types.size() ) {
+        this->cameraCapture.read(cameraFeed);
+        flip(cameraFeed,cameraFeed, 1);
+        cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
+        callback_data.cameraFeed = HSV;
+        imshow("Calibration", cameraFeed);
+        waitKey(1);
+    }
+
+
+    file.close();
+
+    // Repeat operations from the constructor to update block objects with new values
+    this->block_types.clear();
+
+    Block red_block("red_block"), green_block("green_block"),
+            blue_block("blue_block"), yellow_block("yellow_block");
+
+    this->block_types.push_back(red_block);
+    this->block_types.push_back(green_block);
+    this->block_types.push_back(blue_block);
+    this-> block_types.push_back(yellow_block);
+
+    destroyWindow("Calibration");
+    destroyWindow("Cropped");
+}
+
+void MainRozpoznawator::findBoardPos( Mat* cameraFeed ){
+
+    vector<Marker> markers;
+    this->mDetector.detect(*cameraFeed,markers);
+
+    Marker topLeft, topRight, bottomLeft, bottomRight;
+
+    for (unsigned int i=0;i<markers.size();i++) {
+        if( markers.at(i).id == this->topLeftBoardId ){
+            topLeft = markers.at(i);
+            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
+        }else if( markers.at(i).id == this->topRightBoardId ){
+            topRight = markers.at(i);
+            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
+        }else if( markers.at(i).id == this->bottomLeftBoardId ){
+            bottomLeft = markers.at(i);
+            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
+        }else if( markers.at(i).id == this->bottomRightBoardId ){
+            bottomRight = markers.at(i);
+            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
+        }
+    }
+
+
+    this->minColRange = min({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y});
+    this->minRowRange = min({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x});
+    this->maxColRange = max({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y});
+    this->maxRowRange = max({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x});
+}
+
+void MainRozpoznawator::crop2Board(){
+    this->cameraFrame = this->cameraFrame.colRange(this->minColRange,this->maxColRange);
+    this->cameraFrame = this->cameraFrame.rowRange(this->minRowRange,this->maxRowRange);
+}
+
+struct BoardConfCallbackData {
+    Mat* cameraFeed;
+    bool* board_configured;
+    MainRozpoznawator* rozpoznawator;
+} ;
+
+void boardConfCallback(int event, int x, int y, int flags, void* userdata){
+
+    if( event == EVENT_LBUTTONDOWN ){
+
+        BoardConfCallbackData* data = (BoardConfCallbackData*) userdata;
+
+        bool topLeftFound = false;
+        bool topRightFound = false;
+        bool bottomLeftFound = false;
+        bool bottomRightFound = false;
+        vector<Marker> markers;
+        data->rozpoznawator->detector().detect(*(data->cameraFeed),markers);
+
+        Marker topLeft, topRight, bottomLeft, bottomRight;
+
+        for (unsigned int i=0;i<markers.size();i++) {
+            if( markers.at(i).id == data->rozpoznawator->topLeftBoardId ){
+                topLeft = markers.at(i);
+                topLeftFound = true;
+            }else if( markers.at(i).id == data->rozpoznawator->topRightBoardId ){
+                topRight = markers.at(i);
+                topRightFound = true;
+            }else if( markers.at(i).id == data->rozpoznawator->bottomLeftBoardId ){
+                bottomLeft = markers.at(i);
+                bottomLeftFound = true;
+            }else if( markers.at(i).id == data->rozpoznawator->bottomRightBoardId ){
+                bottomRight = markers.at(i);
+                bottomRightFound = true;
+            }
+        }
+
+        if( topLeftFound && topRightFound && bottomLeftFound && bottomRightFound ){
+            data->rozpoznawator->setMinRowRange( min({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y}) );
+            data->rozpoznawator->setMinColRange( min({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x}) );
+            data->rozpoznawator->setMaxRowRange( max({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y}) );
+            data->rozpoznawator->setMaxColRange( max({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x}) );
+            topLeft.draw(*(data->cameraFeed),Scalar(0,0,255),2);
+            topRight.draw(*(data->cameraFeed),Scalar(0,0,255),2);
+            bottomLeft.draw(*(data->cameraFeed),Scalar(0,0,255),2);
+            bottomRight.draw(*(data->cameraFeed),Scalar(0,0,255),2);
+            *(data->board_configured) = true;
+        }
+
+    }
+}
+
+void MainRozpoznawator::drawCross( Mat* frame ){
+    line(*frame,Point(this->centerX - 10, this->centerY), Point(this->centerX + 10, this->centerY), Scalar(0,0,255), 2);
+    line(*frame,Point(this->centerX , this->centerY- 10), Point(this->centerX , this->centerY + 10), Scalar(0,0,255), 2);
+}
+
+void MainRozpoznawator::boardConfiguration(){
+
+    Mat cameraFeed;
+    Mat drawFrame;
+    MarkerDetector markerDetector;
+    bool board_configured = false;
+    BoardConfCallbackData callback_data;
+
+    callback_data.board_configured = &board_configured;
+    callback_data.rozpoznawator = this;
+
+    vector<Marker> Markers;
+    namedWindow("Board_Config", 1);
+
+
+    setMouseCallback("Board_Config", boardConfCallback , &callback_data);
+
+    while ( !board_configured ) {
+        this->cameraCapture.read(cameraFeed);
+        this->cameraCapture.read(drawFrame);
+        flip(cameraFeed,cameraFeed, 1);
+        flip(drawFrame,drawFrame, 1);
+        callback_data.cameraFeed = &cameraFeed;
+
+        Markers.clear();
+        markerDetector.detect(cameraFeed,Markers);
+
+        for (unsigned int i=0;i<Markers.size();i++) {
+            if( Markers.at(i).id == this->topLeftBoardId ){
+               Markers[i].draw(drawFrame,Scalar(0,0,255),2);
+            }else if( Markers.at(i).id == this->topRightBoardId ){
+               Markers[i].draw(drawFrame,Scalar(0,0,255),2);
+            }else if( Markers.at(i).id == this->bottomLeftBoardId ){
+               Markers[i].draw(drawFrame,Scalar(0,0,255),2);
+            }else if( Markers.at(i).id == this->bottomRightBoardId ){
+               Markers[i].draw(drawFrame,Scalar(0,0,255),2);
+            }
+
+        }
+        this->drawCross(&drawFrame);
+        imshow("Board_Config", drawFrame);
+        waitKey(1);
+    }
+    imshow("Board_Config", cameraFeed);
+    waitKey(10000);
+    destroyWindow("Board_Config");
+
+
+}
+
 void MainRozpoznawator::mainWork()
 {
   //  int sleepTime = 100 + qrand()%900;
   //  QThread::msleep(sleepTime);
 
     this->cameraCapture.read(this->cameraFrame);
-    //crop2Board();
+    flip(this->cameraFrame, this->cameraFrame, 1);
+
+    crop2Board();
 #ifdef DEBUG
     this->drawFrame = this->cameraFrame;
 #endif
+
     findBoxes();
     findRobots();
 
 #ifdef DEBUG
     imshow(windowName, this->drawFrame);
 #endif
+
+
 
    // updateRobotPosition();
    // updateBoxesPositions();

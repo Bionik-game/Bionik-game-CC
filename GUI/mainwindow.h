@@ -21,6 +21,8 @@ private:
 
 signals:
     void quittingApplication();
+    void startColourConfiguration();
+    void startBoardConfiguration();
 
 public slots:
     void updateRobotCommands(RobotCommands robotCommands);
@@ -28,6 +30,9 @@ public slots:
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);
+private slots:
+    void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
 };
 
 #endif // MAINWINDOW_H
