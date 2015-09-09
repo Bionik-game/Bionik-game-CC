@@ -23,7 +23,8 @@ void MainKlocki::processData()
 void MainKlocki::gameState(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
     auto it = std::find(robotVec.begin(), robotVec.end(), robotId);
-    dataCollector.set(0, *it);
+    if (it != robotVec.end())
+        dataCollector.set(0, *it);
 
     std::vector<ColorBox> colorBoxVecFiltered;
     for (ColorBox& colorBox : colorBoxVec)
