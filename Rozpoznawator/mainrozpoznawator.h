@@ -1,13 +1,14 @@
 #ifndef MAINROZPOZNAWATOR_H
 #define MAINROZPOZNAWATOR_H
 
-#define DEBUG
+//#define DEBUG
 
 #include <vector>
 #include <math.h>
 #include <string>
 
 #include <QThread>
+#include <QVector>
 #include <QTimer>
 
 #include <opencv2/core/core.hpp>
@@ -28,42 +29,35 @@ class MainRozpoznawator : public QThread
     Q_OBJECT
 
 public:
-    const unsigned int robot1Id = 1000;
-    const unsigned int robot2Id = 500;
+    const unsigned int robot1Id = 1000;         //Id znacznika robota nr 1
+    const unsigned int robot2Id = 500;          //Id znacznika robota nr 2
     const unsigned int topLeftBoardId = 678;
-    const unsigned int topRightBoardId = 495;
+    const unsigned int topRightBoardId = 495;   // Id znaczników planszy
     const unsigned int bottomLeftBoardId = 233;
     const unsigned int bottomRightBoardId = 341;
 
 
 private:
     QTimer rythm;
-    unsigned long robotPositionX;
     cv::VideoCapture cameraCapture;
     cv::Mat cameraFrame;
 
-    bool calibrationOn;
-
-    vector<Block> block_types;
-    vector<ColorBoxPosition> boxesPosition;
+    vector<Block> block_types;              // Wektor przechowujący bloki z informacją o wyszukiwanych kolorach
+    std::vector<ColorBox> colorBoxesInfo;
 
     aruco::MarkerDetector mDetector;
-    vector<RobotPosition> robotsPosition;
+    std::vector<Robot> robotsinfo;
 
 #ifdef DEBUG
     const std::string windowName = "Debug_window";
     cv::Mat drawFrame;
 #endif
 
+    unsigned int centerX;   // Współrzędna środka klatki
+    unsigned int centerY;   // Współrzędna środka klatki
 
-
-
-
-    unsigned int centerX;
-    unsigned int centerY;
-
-    unsigned int minColRange;
-    unsigned int maxColRange;
+    unsigned int minColRange;   // Wartości określające przedziały wartości
+    unsigned int maxColRange;   // do wycięcia z klatki, po wykryciu planszy
     unsigned int minRowRange;
     unsigned int maxRowRange;
 
@@ -82,27 +76,24 @@ public:
     void setMaxRowRange(unsigned int value);
 
 private:
-    void updateRobotPosition();
-    void updateBoxesPositions();
-    void findBoxes();
-    void findRobots();
-    void morphOps(cv::Mat &thresh);
-    void trackFilteredObject(vector<Block>* blocks, Block theBlock, cv::Mat threshold,
+    void findBoxes();                           // Wyszukiwanie kolorowych obiektów
+    void findRobots();                          // Wyszukiwanie robotów
+    void morphOps(cv::Mat &thresh);             // Operacja pomocnicza do przetwarzania obrazu
+    void trackFilteredObject(vector<Block>* blocks, Block theBlock, cv::Mat threshold,  //Śledzenie znalezionych kolorowych obiektów
            cv::Mat HSV, cv::Mat &cameraFeed);
-    void crop2Board();
-    void findBoardPos(cv::Mat*  cameraFeed);
+    void crop2Board();                          // Obcinanie klatki obrazu do znalezionej planszy
+    void findBoardPos(cv::Mat*  cameraFeed);    // Wyszukiwanie znaczników planszy
 
 
-    void drawObject(vector<Block> theBlocks, cv::Mat &frame);
-    void drawCross( cv::Mat* frame );
+    void drawObject(vector<Block> theBlocks, cv::Mat &frame); // Rysowanie znalezionych kolorowych obiektów
+    void drawCross( cv::Mat* frame ); // Rysowanie pomocniczego krzyzyka na srodku klatki
 
 signals:
-    void robotPositionUpdate(std::vector<RobotPosition> robotPosition);
-    void boxesPositionUpdate(std::vector<ColorBoxPosition> boxesPositionVector);
+    void gameState(std::vector<Robot> robotsinfo, std::vector<ColorBox> colorBoxesInfo);
 
 public slots:
-    void colourCalibration();
-    void boardConfiguration();
+    void colourCalibration();           //Slot na sygnał z przycisku z głównego okna
+    void boardConfiguration();          //Slot na sygnał z przycisku z głównego okna
 
 private slots:
     void mainWork();
@@ -110,4 +101,5 @@ private slots:
 };
 
 #endif // MAINROZPOZNAWATOR_H
+
 

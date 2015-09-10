@@ -2,28 +2,64 @@
 #define ROBOTPOSITION_H
 
 
-struct RobotPosition
+struct Robot
 {
-    const long xCentimeters;
-    const long yCentimeters;
-    const float rotationRadians;
-    RobotPosition( long xCentimeters, long yCentimeters, float rotationRadians);
+    unsigned robotId;
+    long xCentimeters;
+    long yCentimeters;
+    float rotationRadians;
+
+    bool operator==(unsigned robotId)
+    {
+        return this->robotId == robotId;
+    }
 };
 
-struct ColorBoxPosition
+struct ColorBox
 {
-    const enum Color {RED, GREEN, BLUE} color;
-    const long xCentimeters;
-    const long yCentimeters;
-    ColorBoxPosition( long xCentimeters, long yCentimeters, Color color);
+    enum Color {RED, GREEN, BLUE} color;
+    long xCentimeters;
+    long yCentimeters;
+    double area;
 };
 
 struct RobotCommands
 {
-    const double xCentimetersPerSecond;
-    const double yCentimetersPerSecond;
-    const double zRadiansPerSecond;
-    RobotCommands(double xCentimetersPerSecond, double yCentimetersPerSecond, double zRadiansPerSecond);
+    unsigned robotId;
+    double xCentimetersPerSecond;
+    double yCentimetersPerSecond;
+    double zRadiansPerSecond;
 };
+
+struct BoardIndicator
+{
+    double xCentimetersPerSecond;
+    double yCentimetersPerSecond;
+};
+
+struct RobotGoal
+{
+    double xCentimetersPerSecond;
+    double yCentimetersPerSecond;
+    unsigned goalId;
+};
+
+/**
+ * Aby móc wysyłać sygnałami klasy, które nie są dostarczone przez Qt,
+ * należy je zadeklarować poniżej i zarejestrować w funkcji "registerMetaTypes".
+ */
+#include <QObject>
+Q_DECLARE_METATYPE(ColorBox)
+Q_DECLARE_METATYPE(Robot)
+Q_DECLARE_METATYPE(RobotCommands)
+Q_DECLARE_METATYPE(BoardIndicator)
+Q_DECLARE_METATYPE(RobotGoal)
+Q_DECLARE_METATYPE(std::vector<ColorBox>)
+Q_DECLARE_METATYPE(std::vector<Robot>)
+Q_DECLARE_METATYPE(std::vector<RobotCommands>)
+Q_DECLARE_METATYPE(std::vector<BoardIndicator>)
+Q_DECLARE_METATYPE(std::vector<RobotGoal>)
+
+void registerMetaTypes();
 
 #endif // ROBOTPOSITION_H

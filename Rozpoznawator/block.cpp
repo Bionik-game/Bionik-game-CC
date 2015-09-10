@@ -154,3 +154,13 @@ void Block::setHSVmax(Scalar max){
 
     Block::HSVmax = max;
 }
+
+double Block::getArea() const
+{
+    return area;
+}
+
+void Block::setArea(double value)
+{
+    area = value;
+}

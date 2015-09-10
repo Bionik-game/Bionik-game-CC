@@ -18,6 +18,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    registerMetaTypes();
 
     /**
      * Obiekt klasy MainWindow działa w głównym wątku
@@ -31,8 +32,16 @@ int main(int argc, char *argv[])
      * implementacją niezależną od pętli zdarzeń (odpowiednik main,
      * to metoda run)
      */
-    MainRozpoznawator rozpoznawator;
-    MainKlocki klocki;
+    MainRozpoznawator* rozpoznawator = new MainRozpoznawator;
+    QThread rozpoznawatorThread;
+    rozpoznawator->moveToThread(&rozpoznawatorThread);
+    QObject::connect(&rozpoznawatorThread, &QThread::finished, rozpoznawator, &QObject::deleteLater);
+
+    std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN};
+    MainKlocki* klocki = new MainKlocki(1, colorSet);
+    QThread klockiThread;
+    klocki->moveToThread(&klockiThread);
+    QObject::connect(&klockiThread, &QThread::finished, klocki, &QObject::deleteLater);
 
 
     /***** CONNECTIONS *****/
@@ -40,24 +49,23 @@ int main(int argc, char *argv[])
     /**
      * Wyłączenie głównego okna aplikacji spowoduje zatrzymanie pracy wątków.
      */
-    QObject::connect(&window, &MainWindow::quittingApplication, &rozpoznawator, &MainRozpoznawator::quit);
-    QObject::connect(&window, &MainWindow::quittingApplication, &klocki, &MainKlocki::quit);
+    QObject::connect(&window, &MainWindow::quittingApplication, &rozpoznawatorThread, &QThread::quit);
+    QObject::connect(&window, &MainWindow::quittingApplication, &klockiThread, &QThread::quit);
 
     /**
      * Połączenia pomiędzy przyciskami w GUI a funkcjami Rozpoznawatora
      */
-    QObject::connect(&window, &MainWindow::startColourConfiguration, &rozpoznawator,&MainRozpoznawator::colourCalibration);
-    QObject::connect(&window, &MainWindow::startBoardConfiguration, &rozpoznawator,&MainRozpoznawator::boardConfiguration);
+    QObject::connect(&window, &MainWindow::startColourConfiguration, rozpoznawator, &MainRozpoznawator::colourCalibration);
+    QObject::connect(&window, &MainWindow::startBoardConfiguration, rozpoznawator, &MainRozpoznawator::boardConfiguration);
     /**
      * Łączenie danych między wątkami
      */
-    QObject::connect(&rozpoznawator, &MainRozpoznawator::robotPositionUpdate, &klocki, &MainKlocki::updateRobotPosition);
-    QObject::connect(&rozpoznawator, &MainRozpoznawator::boxesPositionUpdate, &klocki, &MainKlocki::updateBoxesPositions);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klocki, &MainKlocki::gameState);
 
     /**
      * Wyświetlanie informacji w oknie aplikacji
      */
-    QObject::connect(&klocki, &MainKlocki::robotCommandUpdate, &window, &MainWindow::updateRobotCommands);
+    QObject::connect(klocki, &MainKlocki::robotCommandUpdate, &window, &MainWindow::updateRobotCommands);
 
     /***********************/
 
@@ -69,8 +77,8 @@ int main(int argc, char *argv[])
      * Standardowa implementacja tej metody wywołuję z kolei metodę
      * exec, która obsługuję pętlę zdarzeń.
      */
-    rozpoznawator.start();
-  //  klocki.start();
+    rozpoznawatorThread.start();
+    klockiThread.start();
 
     /**
      * Wyświetlanie okna interfejsu użytkownika
@@ -89,8 +97,8 @@ int main(int argc, char *argv[])
      * Przed zakończeniem wykonania głównego wątku (i wywołaniu destruktora pozostałych wątków)
      * należy poczekać na zakończenie wywołanych wątków.
      */
-    rozpoznawator.wait();
-  //  klocki.wait();
+    rozpoznawatorThread.wait();
+    klockiThread.wait();
 
     return appReturnValue;
 }

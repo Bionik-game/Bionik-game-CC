@@ -48,9 +48,14 @@ public:
         Colour = c;
     }
 
+    double getArea() const;
+
+    void setArea(double value);
+
 private:
 
     int xPos, yPos;
+    double area;
     string type;
     Scalar HSVmin, HSVmax;
     Scalar Colour;

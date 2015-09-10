@@ -33,7 +33,7 @@ void MainRozpoznawator::setMaxRowRange(unsigned int value)
 }
 
 MainRozpoznawator::MainRozpoznawator()
-    : rythm(this), robotPositionX(30)
+    : rythm(this)
 {
     /////////////////////// Camera capture setup
     this->cameraCapture.open(0);
@@ -80,32 +80,16 @@ MainRozpoznawator::MainRozpoznawator()
     rythm.start(0);
 }
 
-void MainRozpoznawator::updateRobotPosition()
-{
-    emit robotPositionUpdate(this->robotsPosition);
-
-}
-
-void MainRozpoznawator::updateBoxesPositions()
-{
-
-    emit boxesPositionUpdate(this->boxesPosition);
-}
-
 
 
 void MainRozpoznawator::findBoxes(){
 
-    this->boxesPosition.clear();
 
     Mat cameraFeed = this->cameraFrame;
     Mat threshold;
     Mat HSV;
 
     vector<Block> all_blocks;
-
-
-
 
 
     // Run through all types of blocks and find them on the image
@@ -122,23 +106,28 @@ void MainRozpoznawator::findBoxes(){
 
     for (unsigned int i = 0; i < all_blocks.size(); ++i) {
 
-        ColorBoxPosition::Color color;
-        if(all_blocks.at(i).getType()=="red_block"){
+        ColorBox::Color color;
+        if(all_blocks.at(i).getType()=="red_block"){                //TODO: Zmienić string w klasie Block na jakiś enum
 
-        color = ColorBoxPosition::RED;
+        color = ColorBox::Color::RED;
 
         }else if(all_blocks.at(i).getType()=="green_block"){
 
-        color = ColorBoxPosition::GREEN;
+        color = ColorBox::Color::GREEN;
 
         }else if(all_blocks.at(i).getType()=="blue_block"){
 
-        color = ColorBoxPosition::BLUE;
+        color = ColorBox::Color::BLUE;
 
         }else if(all_blocks.at(i).getType()=="yellow_block"){
 
         }
-        this->boxesPosition.push_back(ColorBoxPosition(all_blocks.at(i).getXPos()-centerX ,all_blocks.at(i).getYPos() - centerY ,color));
+        ColorBox box;
+        box.color = color;
+        box.xCentimeters = all_blocks.at(i).getXPos() - centerX;
+        box.yCentimeters = all_blocks.at(i).getYPos() - centerY;
+        box.area = all_blocks.at(i).getArea();
+        this->colorBoxesInfo.push_back(box);
     }
 
 #ifdef DEBUG
@@ -205,6 +194,7 @@ void MainRozpoznawator::trackFilteredObject(vector<Block>* blocks, Block theBloc
                     block.setYPos(moment.m01 / area);
                     block.setType(theBlock.getType());
                     block.setColour(theBlock.getColour());
+                    block.setArea(area);
 
                     blocks->push_back(block);
 
@@ -271,8 +261,12 @@ void MainRozpoznawator::findRobots() {
 
     for (unsigned int i=0;i<markers.size();i++) {
         if( markers.at(i).id == this->robot1Id ){
-            angle  = calculate_angle(markers[i]);
-            this->robotsPosition.push_back(RobotPosition( markers.at(i).getCenter().x - this->centerX, markers.at(i).getCenter().y - centerY, angle));
+            Robot robot;
+            robot.robotId = 1;
+            robot.rotationRadians = angle;
+            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX;
+            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY;
+            this->robotsinfo.push_back(robot);
 #ifdef DEBUG
             putText(this->drawFrame, to_string(180 * angle / M_PI),    //draw marker info and its boundaries in the image
                     cv::Point(markers[i][0].x,
@@ -282,7 +276,12 @@ void MainRozpoznawator::findRobots() {
 #endif;
         } else if( markers.at(i).id == this->robot2Id ){
             angle  = calculate_angle(markers[i]);
-            this->robotsPosition.push_back(RobotPosition( markers.at(i).getCenter().x, markers.at(i).getCenter().y, angle));
+            Robot robot;
+            robot.robotId = 2;
+            robot.rotationRadians = angle;
+            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX;
+            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY;
+            this->robotsinfo.push_back(robot);
 #ifdef DEBUG
             putText(this->drawFrame, to_string(180 * angle / M_PI),    //draw marker info and its boundaries in the image
                     cv::Point(markers[i][0].x,
@@ -303,9 +302,7 @@ struct colourCalibCallbackData {
 } ;
 
 
-void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {
-
-
+void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {      // Funkcja callback dla kliknięcia myszki przy kalibracji kolorów
 
 
     if (event == EVENT_LBUTTONDOWN) {
@@ -480,7 +477,7 @@ struct BoardConfCallbackData {
     MainRozpoznawator* rozpoznawator;
 } ;
 
-void boardConfCallback(int event, int x, int y, int flags, void* userdata){
+void boardConfCallback(int event, int x, int y, int flags, void* userdata){         // Funkcja callback dla kliknięcia myszki przy wykrywaniu planszy
 
     if( event == EVENT_LBUTTONDOWN ){
 
@@ -583,8 +580,11 @@ void MainRozpoznawator::boardConfiguration(){
 
 void MainRozpoznawator::mainWork()
 {
-  //  int sleepTime = 100 + qrand()%900;
-  //  QThread::msleep(sleepTime);
+    int sleepTime = 1 + qrand()%90;
+    QThread::msleep(sleepTime);
+
+    this->robotsinfo.clear();
+    this->colorBoxesInfo.clear();
 
     this->cameraCapture.read(this->cameraFrame);
     flip(this->cameraFrame, this->cameraFrame, 1);
@@ -603,7 +603,7 @@ void MainRozpoznawator::mainWork()
 
 
 
-   // updateRobotPosition();
-   // updateBoxesPositions();
+   emit gameState(this->robotsinfo, this->colorBoxesInfo);
 }
+
 

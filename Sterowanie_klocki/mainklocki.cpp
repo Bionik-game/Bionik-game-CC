@@ -1,32 +1,37 @@
 #include "mainklocki.h"
 
-MainKlocki::MainKlocki()
-    : tempVal(0.0)
+#include <algorithm>
+
+MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxColorSet)
+    : tempVal(0.0), robotId(robotId),boxColorSet(boxColorSet)
 {
     QObject::connect(&dataCollector, &MyDataCollector::allDataNew, this, &MainKlocki::processData);
 }
 
 void MainKlocki::processData()
 {
-    RobotPosition robotPosition = dataCollector.get<RobotPosition>(0);
-    std::vector<ColorBoxPosition> boxes = dataCollector.get<std::vector<ColorBoxPosition>>(1);
+    Robot robotPosition = dataCollector.get<Robot>(0);
+    std::vector<ColorBox> boxes = dataCollector.get<std::vector<ColorBox>>(1);
     // Jakieś tam dziwne obliczenia...
 
-    RobotCommands robotCommands = {tempVal, tempVal*2, tempVal/2};
+    RobotCommands robotCommands = {robotPosition.robotId, tempVal, tempVal*2, tempVal/2};
     emit robotCommandUpdate(robotCommands);
 
     tempVal += 1.3;
 }
 
-
-
-void MainKlocki::updateRobotPosition(std::vector<RobotPosition> robotPosition)
+void MainKlocki::gameState(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
-    dataCollector.set(0, robotPosition);
-}
+    auto it = std::find(robotVec.begin(), robotVec.end(), robotId);
+    if (it != robotVec.end())
+        dataCollector.set(0, *it);
 
+    std::vector<ColorBox> colorBoxVecFiltered;
+    for (ColorBox& colorBox : colorBoxVec)
+    {
+        if (boxColorSet.find(colorBox.color) != boxColorSet.end())
+            colorBoxVecFiltered.push_back(colorBox);
 
-void MainKlocki::updateBoxesPositions(std::vector<ColorBoxPosition> boxesPositionVector)
-{
-    dataCollector.set(1, boxesPositionVector);
+    }
+    dataCollector.set(1, colorBoxVecFiltered);
 }

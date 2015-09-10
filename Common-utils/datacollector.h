@@ -9,6 +9,7 @@ class SignalClass : public QObject
     Q_OBJECT
 signals:
     void allDataNew();
+    void dataDropped(unsigned int no);
 };
 
 class LastTag
@@ -21,66 +22,61 @@ public:
     }
 };
 
-template<typename T>
-class DataWrapper
-{
-private:
-    T* data;
-public:
-    class DataNotSetExceptionDataWrapper : std::exception {
-    public:
-        const char *what() const noexcept {return "Data for this element has not been yet set";}
-    };
-
-    DataWrapper()
-        : data(nullptr)
-    {
-    }
-    ~DataWrapper()
-    {
-        if(data != nullptr)
-            delete data;
-    }
-
-    DataWrapper& operator=(const T& operand)
-    {
-        if(data != nullptr)
-            delete data;
-        data = new T(operand);
-    }
-    template<typename K>
-    DataWrapper& operator=(const K&)
-    {
-        throw std::runtime_error("Something is implemented wrong! DataWrapper& DataWrapper::operator=(K& operand)");
-    }
-
-    void getData(T*& t) throw(DataNotSetExceptionDataWrapper)
-    {
-        if (data == nullptr)
-            throw DataNotSetExceptionDataWrapper();
-        t = data;
-    }
-    template<typename K>
-    void getData(K*&)
-    {
-        throw std::runtime_error("Something is implemented wrong! void DataWrapper::getData(K& k)");
-    }
-};
-
 template<typename T = LastTag, typename...Args>
 class DataCollector : public SignalClass
 {
+    template<typename X>
+    friend class DataCollector<T, Args...>; //External class can access private methods of internal one
 private:
+    template<typename S>
+    class DataWrapper
+    {
+    private:
+        S* data;
+    public:
+        class DataNotSetExceptionDataWrapper : std::exception {
+        public:
+            const char *what() const noexcept {return "Data for this element has not been yet set";}
+        };
+
+        DataWrapper()
+            : data(nullptr)
+        {
+        }
+        ~DataWrapper()
+        {
+            if(data != nullptr)
+                delete data;
+        }
+
+        DataWrapper& operator=(const S& operand)
+        {
+            if(data != nullptr)
+                delete data;
+            data = new S(operand);
+        }
+        template<typename K>
+        DataWrapper& operator=(const K&)
+        {
+            throw std::runtime_error("Something is implemented wrong! DataWrapper& DataWrapper::operator=(K& operand)");
+        }
+
+        void getData(S*& t) throw(DataNotSetExceptionDataWrapper)
+        {
+            if (data == nullptr)
+                throw DataNotSetExceptionDataWrapper();
+            t = data;
+        }
+        template<typename K>
+        void getData(K*&)
+        {
+            throw std::runtime_error("Something is implemented wrong! void DataWrapper::getData(K& k)");
+        }
+    };
+
     DataWrapper<T> element;
     bool changed;
     DataCollector<Args...>* dataCollector;
-
-public:
-    class DataNotSetException : std::exception {
-    public:
-        const char *what() const noexcept {return "Data for this element has not been yet set";}
-    };
-
 
     template<typename K>
     void setRecursive(unsigned int no, const K& element)
@@ -90,7 +86,10 @@ public:
         else if(no == 0)
         {
             this->element = element;
-            changed = true;
+            if (changed == true) //data was set twice or more before it was get
+                emit dataDropped(no);
+            else
+                changed = true;
         }
         else
             dataCollector->setRecursive(no-1, element);
@@ -129,6 +128,11 @@ public:
     }
 
 public:
+    class DataNotSetException : std::exception {
+    public:
+        const char *what() const noexcept {return "Data for this element has not been yet set";}
+    };
+
     DataCollector()
         : changed(false)
     {
