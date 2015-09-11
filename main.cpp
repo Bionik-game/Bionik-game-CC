@@ -58,6 +58,13 @@ int main(int argc, char *argv[])
     QObject::connect(&window, &MainWindow::startColourConfiguration, rozpoznawator, &MainRozpoznawator::colourCalibration);
     QObject::connect(&window, &MainWindow::startBoardConfiguration, rozpoznawator, &MainRozpoznawator::boardConfiguration);
     /**
+     * Połączenia umożliwiające wyświetlanie obrazów z Rozpoznawatora w głównym oknie
+    /**
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateMainImage, &window, &MainWindow::updateMainImage);
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateColourCalibImage, &window, &MainWindow::updateColourCalibImage ) ;
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateBoardConfImage, &window, &MainWindow::updateBoardConfImage);
+
+    /**
      * Łączenie danych między wątkami
      */
     QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klocki, &MainKlocki::gameState);

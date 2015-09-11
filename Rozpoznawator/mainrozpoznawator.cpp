@@ -44,7 +44,7 @@ MainRozpoznawator::MainRozpoznawator()
 
 
 #ifdef DEBUG
-    namedWindow(windowName, 1);
+ //   namedWindow(windowName, 1);
 #endif
     /////////////////////// Setup for tracking boxes
     Block red_block("red_block"), green_block("green_block"),
@@ -382,7 +382,7 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
 
 
         cout << hChannelSum << " " << sChannelSum << " " << vChannelSum << endl;
-        imshow("Cropped", croppedFeed);
+  //      imshow("Cropped", croppedFeed);
         *colours_calibrated += 1;
 
     }
@@ -398,8 +398,8 @@ void MainRozpoznawator::colourCalibration() {
     fstream file;
     file.open("colour_data.txt", ios::out);
 
-    namedWindow("Calibration", 1);
-    namedWindow("Cropped", 1);
+  //  namedWindow("Calibration", 1);
+  //  namedWindow("Cropped", 1);
 
     colourCalibCallbackData callback_data;
 
@@ -414,7 +414,8 @@ void MainRozpoznawator::colourCalibration() {
         flip(cameraFeed,cameraFeed, 1);
         cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
         callback_data.cameraFeed = HSV;
-        imshow("Calibration", cameraFeed);
+       // imshow("Calibration", cameraFeed);
+        emit updateColourCalibImage( cameraFeed );
         waitKey(1);
     }
 
@@ -540,7 +541,7 @@ void MainRozpoznawator::boardConfiguration(){
     callback_data.rozpoznawator = this;
 
     vector<Marker> Markers;
-    namedWindow("Board_Config", 1);
+ //   namedWindow("Board_Config", 1);
 
 
     setMouseCallback("Board_Config", boardConfCallback , &callback_data);
@@ -568,7 +569,8 @@ void MainRozpoznawator::boardConfiguration(){
 
         }
         this->drawCross(&drawFrame);
-        imshow("Board_Config", drawFrame);
+       // imshow("Board_Config", drawFrame);
+        emit updateBoardConfImage( drawFrame );
         waitKey(1);
     }
     imshow("Board_Config", cameraFeed);
@@ -580,7 +582,7 @@ void MainRozpoznawator::boardConfiguration(){
 
 void MainRozpoznawator::mainWork()
 {
-    int sleepTime = 1 + qrand()%90;
+    int sleepTime = 100 + qrand()%900;
     QThread::msleep(sleepTime);
 
     this->robotsinfo.clear();
@@ -598,9 +600,9 @@ void MainRozpoznawator::mainWork()
     findRobots();
 
 #ifdef DEBUG
-    imshow(windowName, this->drawFrame);
+//    imshow(windowName, this->drawFrame);
+   emit updateMainImage( this->drawFrame);
 #endif
-
 
 
    emit gameState(this->robotsinfo, this->colorBoxesInfo);

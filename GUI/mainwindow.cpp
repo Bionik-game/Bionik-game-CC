@@ -6,6 +6,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    cv::namedWindow( "Debug_window", 1);
+    cv::namedWindow("Calibration", 1);
+    cv::namedWindow("Board_Config", 1);
 }
 
 MainWindow::~MainWindow()
@@ -34,4 +37,17 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     emit startBoardConfiguration();
+}
+
+
+void MainWindow::updateMainImage( cv::Mat frame ){
+    cv::imshow( "Debug_window", frame );
+}
+
+void MainWindow::updateColourCalibImage( cv::Mat frame ){
+    cv::imshow( "Calibration", frame );
+}
+
+void MainWindow::updateBoardConfImage( cv::Mat frame ){
+    cv::imshow( "Board_Config", frame );
 }

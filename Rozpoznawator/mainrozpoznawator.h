@@ -1,7 +1,7 @@
 #ifndef MAINROZPOZNAWATOR_H
 #define MAINROZPOZNAWATOR_H
 
-//#define DEBUG
+#define DEBUG
 
 #include <vector>
 #include <math.h>
@@ -90,6 +90,10 @@ private:
 
 signals:
     void gameState(std::vector<Robot> robotsinfo, std::vector<ColorBox> colorBoxesInfo);
+    void updateMainImage( cv::Mat frame );
+    void updateColourCalibImage( cv::Mat frame );
+    void updateBoardConfImage( cv::Mat frame );
+
 
 public slots:
     void colourCalibration();           //Slot na sygnał z przycisku z głównego okna

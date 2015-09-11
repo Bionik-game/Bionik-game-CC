@@ -3,6 +3,11 @@
 
 #include <QMainWindow>
 #include <Common-utils/mapelements.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/video.hpp>
+#include <opencv2/videoio.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +31,9 @@ signals:
 
 public slots:
     void updateRobotCommands(RobotCommands robotCommands);
+    void updateMainImage( cv::Mat frame );
+    void updateColourCalibImage( cv::Mat frame );
+    void updateBoardConfImage( cv::Mat frame );
 
     // QWidget interface
 protected:
