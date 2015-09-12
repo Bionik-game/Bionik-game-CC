@@ -19,15 +19,37 @@ set (Rozpoznawator_SRC
     Rozpoznawator/mainrozpoznawator.h
 )
 
+set (Priorytetyzator_SRC
+    Priorytetyzator/mainpriorytetyzator.h
+    Priorytetyzator/mainpriorytetyzator.cpp
+)
+
 set (Klocki_SRC
     Sterowanie_klocki/mainklocki.cpp
     Sterowanie_klocki/mainklocki.h
+)
+
+set (Joystick_SRC
+    Sterowanie_joystick/mainjoystick.cpp
+    Sterowanie_joystick/mainjoystick.h
+)
+
+set (Walidator_SRC
+    Walidator/mainwalidator.cpp
+    Walidator/mainwalidator.h
+)
+
+set (Komunikacja_SRC
+    Komunikacja/mainkomunikacja.cpp
+    Komunikacja/mainkomunikacja.h
 )
 
 set (CommonUtils_SRC
     Common-utils/mapelements.cpp
     Common-utils/mapelements.h
     Common-utils/datacollector.h
+    Common-utils/threader.h
+    Common-utils/threader.cpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -35,7 +57,11 @@ add_executable(${PROJECT_NAME}
     ${GUI_SRC}
     ${GUI_UI}
     ${Rozpoznawator_SRC}
+    ${Priorytetyzator_SRC}
     ${Klocki_SRC}
+    ${Joystick_SRC}
+    ${Komunikacja_SRC}
+    ${Walidator_SRC}
     ${CommonUtils_SRC}
 )
 

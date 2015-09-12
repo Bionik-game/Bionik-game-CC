@@ -6,6 +6,11 @@
 #include "GUI/mainwindow.h"
 #include "Rozpoznawator/mainrozpoznawator.h"
 #include "Sterowanie_klocki/mainklocki.h"
+#include "Priorytetyzator/mainpriorytetyzator.h"
+#include "Sterowanie_joystick/mainjoystick.h"
+#include "Walidator/mainwalidator.h"
+#include "Komunikacja/mainkomunikacja.h"
+#include "Common-utils/threader.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,37 +27,49 @@ int main(int argc, char *argv[])
      * Obiekty poniższych klas reprezentujących elementy naszego
      * programu działają w swoim wątku wraz ze swoją pętlą zdarzeń,
      * implementacją niezależną od pętli zdarzeń (odpowiednik main,
-     * to metoda run)
+     * to metoda run). Wyłączenie wątków nastąpi w destruktorze
+     * klasy Threader.
      */
+    Threader threader;
+
     MainRozpoznawator* rozpoznawator = new MainRozpoznawator;
-    QThread rozpoznawatorThread;
-    rozpoznawator->moveToThread(&rozpoznawatorThread);
-    QObject::connect(&rozpoznawatorThread, &QThread::finished, rozpoznawator, &QObject::deleteLater);
+    threader.runInThread(rozpoznawator);
+
+    MainPriorytetyzator* priorytetyzator = new MainPriorytetyzator;
+    Threader::ThreadKey threadKey = threader.runInThread(priorytetyzator);
 
     std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN};
     MainKlocki* klocki = new MainKlocki(1, colorSet);
-    QThread klockiThread;
-    klocki->moveToThread(&klockiThread);
-    QObject::connect(&klockiThread, &QThread::finished, klocki, &QObject::deleteLater);
+    threader.runInThread(klocki, threadKey);
+
+    MainJoystick* joystick = new MainJoystick(1, "/dev/ttyUSB0");
+    threader.runInThread(joystick, threadKey);
+
+    MainWalidator* walidator = new MainWalidator;
+    threader.runInThread(walidator);
+
+    MainKomunikacja* komunikacja = new MainKomunikacja("192.168.0.101");
+    threader.runInThread(komunikacja);
 
 
     /***** CONNECTIONS *****/
 
     /**
-     * Wyłączenie głównego okna aplikacji spowoduje zatrzymanie pracy wątków.
+     * Wyświetlanie informacji w oknie aplikacji
      */
-    QObject::connect(&window, &MainWindow::quittingApplication, &rozpoznawatorThread, &QThread::quit);
-    QObject::connect(&window, &MainWindow::quittingApplication, &klockiThread, &QThread::quit);
+    QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, &window, &MainWindow::updateRobotCommands);
 
     /**
      * Łączenie danych między wątkami
      */
-    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klocki, &MainKlocki::gameState);
-
-    /**
-     * Wyświetlanie informacji w oknie aplikacji
-     */
-    QObject::connect(klocki, &MainKlocki::robotCommandUpdate, &window, &MainWindow::updateRobotCommands);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, priorytetyzator, &MainPriorytetyzator::gameState);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, walidator, &MainWalidator::gameState);
+    QObject::connect(joystick, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
+    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsColors, klocki, &MainKlocki::getCommands);
+    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, joystick, &MainJoystick::getCommands);
+    QObject::connect(klocki, &MainKlocki::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
+    QObject::connect(joystick, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
+    QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
 
     /***********************/
 
@@ -64,8 +81,7 @@ int main(int argc, char *argv[])
      * Standardowa implementacja tej metody wywołuję z kolei metodę
      * exec, która obsługuję pętlę zdarzeń.
      */
-    rozpoznawatorThread.start();
-    klockiThread.start();
+    threader.start();
 
     /**
      * Wyświetlanie okna interfejsu użytkownika
@@ -78,15 +94,6 @@ int main(int argc, char *argv[])
      * nastąpi dopiero, gdy zakończymy pracę pętli np. poprzez
      * wyłączenie głównego okna.
      */
-    int appReturnValue = app.exec();
-
-    /**
-     * Przed zakończeniem wykonania głównego wątku (i wywołaniu destruktora pozostałych wątków)
-     * należy poczekać na zakończenie wywołanych wątków.
-     */
-    rozpoznawatorThread.wait();
-    klockiThread.wait();
-
-    return appReturnValue;
+    return app.exec();
 }
 
