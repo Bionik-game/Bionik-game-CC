@@ -71,6 +71,19 @@ int main(int argc, char *argv[])
     QObject::connect(joystick, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
     QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
 
+    /**
+     * Połączenia pomiędzy przyciskami w GUI a funkcjami Rozpoznawatora
+     */
+    QObject::connect(&window, &MainWindow::startColourConfiguration, rozpoznawator, &MainRozpoznawator::colourCalibration);
+    QObject::connect(&window, &MainWindow::startBoardConfiguration, rozpoznawator, &MainRozpoznawator::boardConfiguration);
+
+     // Połączenia umożliwiające wyświetlanie obrazów z Rozpoznawatora w głównym oknie
+
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateMainImage, &window, &MainWindow::updateMainImage);
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateColourCalibImage, &window, &MainWindow::updateColourCalibImage ) ;
+    QObject::connect( rozpoznawator, &MainRozpoznawator::updateBoardConfImage, &window, &MainWindow::updateBoardConfImage);
+
+
     /***********************/
 
     /**
