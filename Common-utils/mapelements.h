@@ -1,17 +1,12 @@
 #ifndef ROBOTPOSITION_H
 #define ROBOTPOSITION_H
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/video.hpp>
-#include <opencv2/videoio.hpp>
 
 struct Robot
 {
     unsigned robotId;
-    long xCentimeters;
-    long yCentimeters;
+    unsigned long xCentimeters;
+    unsigned long yCentimeters;
     float rotationRadians;
 
     bool operator==(unsigned robotId)
@@ -23,8 +18,8 @@ struct Robot
 struct ColorBox
 {
     enum Color {RED, GREEN, BLUE} color;
-    long xCentimeters;
-    long yCentimeters;
+    unsigned long xCentimeters;
+    unsigned long yCentimeters;
     double area;
 };
 
@@ -64,7 +59,6 @@ Q_DECLARE_METATYPE(std::vector<Robot>)
 Q_DECLARE_METATYPE(std::vector<RobotCommands>)
 Q_DECLARE_METATYPE(std::vector<BoardIndicator>)
 Q_DECLARE_METATYPE(std::vector<RobotGoal>)
-Q_DECLARE_METATYPE(cv::Mat)
 
 void registerMetaTypes();
 
