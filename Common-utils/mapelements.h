@@ -65,6 +65,7 @@ Q_DECLARE_METATYPE(std::vector<RobotCommands>)
 Q_DECLARE_METATYPE(std::vector<BoardIndicator>)
 Q_DECLARE_METATYPE(std::vector<RobotGoal>)
 Q_DECLARE_METATYPE(cv::Mat)
+Q_DECLARE_METATYPE(std::vector<cv::Point2i>)
 
 void registerMetaTypes();
 

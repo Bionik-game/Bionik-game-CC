@@ -100,7 +100,7 @@ signals:
     void updateMainImage( cv::Mat frame );
     void updateColourCalibImage( cv::Mat frame );
     void updateBoardConfImage( cv::Mat frame );
-
+    void boardPos( std::vector<cv::Point2i> boardCorners);
 
 public slots:
     void colourCalibration();           //Slot na sygnał z przycisku z głównego okna

@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
     QObject::connect(klocki, &MainKlocki::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
     QObject::connect(joystick, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
     QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidator, &MainWalidator::boardPos);
 
     /**
      * Połączenia pomiędzy przyciskami w GUI a funkcjami Rozpoznawatora

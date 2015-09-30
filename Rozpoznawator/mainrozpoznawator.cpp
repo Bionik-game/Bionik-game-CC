@@ -93,20 +93,25 @@ bool MainRozpoznawator:: pointInPolygon( int x, int y ) {           //Ray castin
   int   i, j=polyCorners-1 ;
   int xi,xj,yi,yj;
   bool  oddNodes=false ;
+  int temp;
+    temp = 0;
 
 
-  for (i=0; i<polyCorners; i++) {
 
-      xi = this->boardCorners.at(i).x;
-      xj = this->boardCorners.at(j).x;
-      yi = this->boardCorners.at(i).y;
-      yj = this->boardCorners.at(j).y;
 
-      if ((yi<y && yj>=y)
-          ||  (yj<y && yi>=y)) {
+      for (i=0; i<polyCorners; i++) {
+          xi = this->boardCorners.at(i).x - this->minColRange;
+          xj = this->boardCorners.at(j).x - this->minColRange;
+          yi = this->boardCorners.at(i).y - this->minRowRange;
+          yj = this->boardCorners.at(j).y - this->minRowRange;
+
+          if ((yi< y && yj>=y
+          ||   yj< y && yi>=y)
+          &&  (xi<=x || xj<=x)) {
             if (xi+(y-yi)/(yj-yi)*(xj-xi)<x) {
               oddNodes=!oddNodes; }}
           j=i; }
+  //cout << temp << endl;
 
   return oddNodes; }
 
@@ -154,8 +159,8 @@ void MainRozpoznawator::findBoxes(){
         }
         ColorBox box;
         box.color = color;
-        box.xCentimeters = this->all_blocks.at(i).getXPos() - centerX;
-        box.yCentimeters = this->all_blocks.at(i).getYPos() - centerY;
+        box.xCentimeters = this->all_blocks.at(i).getXPos() - centerX + this->minRowRange;
+        box.yCentimeters = this->all_blocks.at(i).getYPos() - centerY + this->minRowRange;
         box.area = this->all_blocks.at(i).getArea();
         this->colorBoxesInfo.push_back(box);
     }
@@ -164,6 +169,7 @@ void MainRozpoznawator::findBoxes(){
 
 
 }
+
 
 void MainRozpoznawator::morphOps(Mat &thresh) {
 
@@ -223,6 +229,8 @@ void MainRozpoznawator::trackFilteredObject(vector<Block>* blocks, Block theBloc
                     block.setType(theBlock.getType());
                     block.setColour(theBlock.getColour());
                     block.setArea(area);
+
+                   // cout << block.getXPos() << " x " << block.getYPos() << endl;
 
                     if( this->pointInPolygon(block.getXPos(), block.getYPos())){
                        blocks->push_back(block);
@@ -296,8 +304,8 @@ void MainRozpoznawator::findRobots() {
             Robot robot;
             robot.robotId = 1;
             robot.rotationRadians = angle;
-            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX;
-            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY;
+            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX + this->minColRange;
+            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY + this->minRowRange;
             this->robotsinfo.push_back(robot);
 #ifdef DEBUG
             putText(this->drawFrame, to_string(180 * angle / M_PI),    //draw marker info and its boundaries in the image
@@ -311,8 +319,8 @@ void MainRozpoznawator::findRobots() {
             Robot robot;
             robot.robotId = 2;
             robot.rotationRadians = angle;
-            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX;
-            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY;
+            robot.xCentimeters = markers.at(i).getCenter().x - this->centerX + this->minColRange;
+            robot.yCentimeters = markers.at(i).getCenter().y - this->centerY + this->minRowRange;
             this->robotsinfo.push_back(robot);
 #ifdef DEBUG
             putText(this->drawFrame, to_string(180 * angle / M_PI),    //draw marker info and its boundaries in the image
@@ -469,35 +477,7 @@ void MainRozpoznawator::colourCalibration() {
 
 }
 
-void MainRozpoznawator::findBoardPos( Mat* cameraFeed ){
 
-    vector<Marker> markers;
-    this->mDetector.detect(*cameraFeed,markers);
-
-    Marker topLeft, topRight, bottomLeft, bottomRight;
-
-    for (unsigned int i=0;i<markers.size();i++) {
-        if( markers.at(i).id == this->topLeftBoardId ){
-            topLeft = markers.at(i);
-            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
-        }else if( markers.at(i).id == this->topRightBoardId ){
-            topRight = markers.at(i);
-            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
-        }else if( markers.at(i).id == this->bottomLeftBoardId ){
-            bottomLeft = markers.at(i);
-            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
-        }else if( markers.at(i).id == this->bottomRightBoardId ){
-            bottomRight = markers.at(i);
-            markers[i].draw(*cameraFeed,Scalar(0,0,255),2);
-        }
-    }
-
-
-    this->minColRange = min({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y});
-    this->minRowRange = min({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x});
-    this->maxColRange = max({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y});
-    this->maxRowRange = max({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x});
-}
 
 void MainRozpoznawator::crop2Board(){
     this->cameraFrame = this->cameraFrame.colRange(this->minColRange,this->maxColRange);
@@ -525,7 +505,7 @@ void boardConfCallback(int event, int x, int y, int flags, void* userdata){     
 
         Marker topLeft, topRight, bottomLeft, bottomRight;
 
-        for (unsigned int i=0;i<markers.size();i++) {
+        for (unsigned int i=0;i<markers.size();i++) {                               // Wykrywanie znacznikow ograniczajacych plansze
             if( markers.at(i).id == data->rozpoznawator->topLeftBoardId ){
                 topLeft = markers.at(i);
                 topLeftFound = true;
@@ -547,11 +527,13 @@ void boardConfCallback(int event, int x, int y, int flags, void* userdata){     
             data->rozpoznawator->setMaxRowRange( max({topLeft.getCenter().y, topRight.getCenter().y, bottomLeft.getCenter().y, bottomRight.getCenter().y}) );
             data->rozpoznawator->setMaxColRange( max({topLeft.getCenter().x, topRight.getCenter().x, bottomLeft.getCenter().x, bottomRight.getCenter().x}) );
 
-            data->rozpoznawator->boardCorners.at(0) = Point2i(topLeft.getCenter().x, topLeft.getCenter().y );
-            cout << topLeft.getCenter().x << endl;
-            data->rozpoznawator->boardCorners.at(1) = Point2i(topRight.getCenter().x, topRight.getCenter().y );
-            data->rozpoznawator->boardCorners.at(2) = Point2i(bottomRight.getCenter().x, bottomRight.getCenter().y );
-            data->rozpoznawator->boardCorners.at(3) = Point2i(bottomLeft.getCenter().x, bottomLeft.getCenter().y );
+            data->rozpoznawator->boardCorners.at(0) = Point2i(topLeft.getCenter() );
+          //  cout << topLeft.getCenter().x << endl;
+            data->rozpoznawator->boardCorners.at(1) = Point2i(topRight.getCenter());
+            data->rozpoznawator->boardCorners.at(2) = Point2i(bottomRight.getCenter());
+            data->rozpoznawator->boardCorners.at(3) = Point2i(bottomLeft.getCenter() );
+         //   cout <<topLeft.getCenter() << " x " << topRight.getCenter() << " " << bottomRight.getCenter() << " " << bottomLeft.getCenter() << endl;
+
 
             topLeft.draw(*(data->cameraFeed),Scalar(0,0,255),2);
             topRight.draw(*(data->cameraFeed),Scalar(0,0,255),2);
@@ -559,7 +541,9 @@ void boardConfCallback(int event, int x, int y, int flags, void* userdata){     
             bottomRight.draw(*(data->cameraFeed),Scalar(0,0,255),2);
 
             *(data->board_configured) = true;
-        } else {
+
+
+        } else {                                                        // W przypadku nie wykrycia wszystkich rogów planszy, powrót do domyslnych ustawien
             data->rozpoznawator->setMinRowRange( 0 );
             data->rozpoznawator->setMinColRange( 0 );
             data->rozpoznawator->setMaxRowRange( FRAME_HEIGHT );
@@ -572,6 +556,7 @@ void boardConfCallback(int event, int x, int y, int flags, void* userdata){     
 
             *(data->board_configured) = true;
         }
+
 
     }
 }
@@ -624,6 +609,7 @@ void MainRozpoznawator::boardConfiguration(){
        // imshow("Board_Config", drawFrame);
         emit updateBoardConfImage( drawFrame );
     }
+    emit boardPos(this->boardCorners);
     imshow("Board_Config", cameraFeed);
     setMouseCallback("Board_Config", NULL , NULL);
 

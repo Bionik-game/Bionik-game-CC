@@ -19,6 +19,8 @@ void registerMetaTypes()
         qRegisterMetaType<std::vector<BoardIndicator>>("std::vector<BoardIndicator>");
         qRegisterMetaType<std::vector<RobotGoal>>("std::vector<RobotGoal>");
         qRegisterMetaType<cv::Mat>("cv::Mat");
+        qRegisterMetaType<std::vector<cv::Point2i>>("std::vector<cv::Point2i");
+
         unregistered = false;
     }
 }
