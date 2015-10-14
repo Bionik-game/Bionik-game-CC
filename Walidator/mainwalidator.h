@@ -11,8 +11,12 @@ class MainWalidator : public QObject
 private:
     typedef DataCollector<std::vector<Robot>, std::vector<ColorBox>, RobotCommands> MyDataCollector;
     MyDataCollector dataCollector;
+    std::vector<cv::Point2i> boardCornersVec;
 public:
     explicit MainWalidator();
+
+private:
+    RobotCommands correctionVelocityVector ( Robot robot, RobotCommands robotCommand );
 
 signals:
     void robotCommandUpdateCorrected(RobotCommands robotCommands);
@@ -23,6 +27,7 @@ private slots:
 public slots:
     void gameState(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec);
     void robotCommandUpdateRaw(RobotCommands robotCommands);
+    void boardPos( std::vector<cv::Point2i> boardCorners);
 };
 
 #endif // MAINWALIDATOR_H

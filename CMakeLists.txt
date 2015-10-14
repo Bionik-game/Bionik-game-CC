@@ -5,6 +5,11 @@ add_definitions(-std=c++11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 find_package(Qt5Widgets)
+find_package(OpenCV REQUIRED)
+
+set(CMAKE_MODULE_PATH "/usr/local/lib/cmake;${CMAKE_MODULE_PATH}")
+
+find_package(aruco REQUIRED)
 
 set (GUI_SRC
     GUI/mainwindow.cpp
@@ -17,6 +22,8 @@ QT5_WRAP_UI(GUI_UI
 set (Rozpoznawator_SRC
     Rozpoznawator/mainrozpoznawator.cpp
     Rozpoznawator/mainrozpoznawator.h
+    Rozpoznawator/block.h
+    Rozpoznawator/block.cpp
 )
 
 set (Priorytetyzator_SRC
@@ -67,5 +74,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     Qt5::Widgets
+    ${OpenCV_LIBS}
+    ${aruco_LIBS}
 )
 
