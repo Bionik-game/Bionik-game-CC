@@ -1,9 +1,10 @@
 #include "mainklocki.h"
 
 #include <algorithm>
+#include <cmath>
 
 MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxColorSet)
-    : tempVal(0.0), robotId(robotId),boxColorSet(boxColorSet)
+    : maxLength(50.0), robotId(robotId),boxColorSet(boxColorSet)
 {
 }
 
@@ -15,19 +16,42 @@ RobotCommands MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<C
         RobotCommands robotCommands = {robotId, 0, 0, 0};
         return robotCommands;
     }
+    Robot& robotDevice = *it;
 
     std::vector<ColorBox> colorBoxVecFiltered;
     for (ColorBox& colorBox : colorBoxVec)
     {
         if (boxColorSet.find(colorBox.color) != boxColorSet.end())
             colorBoxVecFiltered.push_back(colorBox);
-
     }
 
-    // Jakieś tam dziwne obliczenia...
+    vect2d moveVec;
+    for(ColorBox& colorBox : colorBoxVecFiltered)
+    {
+        vect2d robot;
+        robot.x = robotDevice.xCentimeters;
+        robot.y = robotDevice.yCentimeters;
+        vect2d box;
+        box.x = colorBox.xCentimeters;
+        box.y = colorBox.yCentimeters;
 
-    tempVal += 1.3;
-    RobotCommands robotCommands = {robotId, tempVal, tempVal*2, tempVal/2};
+        vect2d normalVec;
+
+        normalVec.x = robot.x-box.x;
+        normalVec.y = robot.y-box.y;
+        double length = sqrt(normalVec.x*normalVec.x+normalVec.y*normalVec.y);
+
+        if(length<maxLength)
+        {
+            double lengthRatio = (maxLength - length) / maxLength; //values between 0 and 1
+            double areaMultiplicator = colorBox.area; //easier to modify later
+
+            moveVec.x += normalVec.x * lengthRatio * areaMultiplicator;
+            moveVec.y += normalVec.y * lengthRatio * areaMultiplicator;
+        }
+    }
+
+    RobotCommands robotCommands = {robotId, moveVec.x, moveVec.y, 0};
 
     emit robotCommandUpdate(robotCommands);
 }

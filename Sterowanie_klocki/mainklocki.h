@@ -12,7 +12,13 @@ class MainKlocki : public QObject
     Q_OBJECT
 
 private:
-    double tempVal;
+    struct vect2d
+    {
+        double x;
+        double y;
+    };
+
+    const double maxLength;
     unsigned robotId;
     std::set<ColorBox::Color> boxColorSet;
 
