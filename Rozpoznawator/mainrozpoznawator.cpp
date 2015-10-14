@@ -36,7 +36,7 @@ MainRozpoznawator::MainRozpoznawator()
     : rythm(this)
 {
     /////////////////////// Camera capture setup
-    this->cameraCapture.open(1);
+    this->cameraCapture.open(videoDeviceId);
     //set height and width of capture frame
     cameraCapture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
     cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);

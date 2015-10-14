@@ -1,10 +1,12 @@
 #include "mainjoystick.h"
+#include <iostream>
+
 MainJoystick::MainJoystick(unsigned robotId, QString device)
     : tempVal(0.0), robotId(robotId), device(device),requestChecker(this), tempCounter(0), padRequest(false)
 {
     QObject::connect(&requestChecker, &QTimer::timeout, this, &MainJoystick::checkRequest);
     requestChecker.start(200);
-
+    joy.setJoystick(0);
 }
 
 void MainJoystick::getCommands()
@@ -32,8 +34,7 @@ void MainJoystick::getCommands()
         joystick.at(current_joystick)->button[6] = joy->buttons[6]; //back
         joystick.at(current_joystick)->button[7] = joy->buttons[7]; //start */
 
-
-    RobotCommands robotCommands = {robotId, joy.axis[4]*0.000915 , joy.axis[3] *0.000915, joy.axis[0]*0.000915};
+    RobotCommands robotCommands = {robotId, joy.axis[4]*0.0305241 , joy.axis[3] *0.0305241, joy.axis[0]*0.0305241};
      //  stala 0.000915 powoduje ze MAX wartosc w strukturze jest mniejsza niz 30
     emit robotCommandUpdate(robotCommands);
 
@@ -41,7 +42,8 @@ void MainJoystick::getCommands()
 
 void MainJoystick::checkRequest()
 {
-    // Jako guzika przejscia uzylem przycisku "A"
+    joy.getdata();
+//     Jako guzika przejscia uzylem przycisku "A"
     if(joy.buttons[0] == 1)
         emit gamePadRequest(true);
     else

@@ -6,7 +6,6 @@
 #include <QList>
 
 namespace sdl {
-//#include "SDL.h"
 #include "SDL/SDL.h"
 }
 

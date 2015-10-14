@@ -8,13 +8,14 @@ MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxCol
 {
 }
 
-RobotCommands MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
+void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
     auto it = std::find(robotVec.begin(), robotVec.end(), robotId);
     if (it == robotVec.end())
     {
         RobotCommands robotCommands = {robotId, 0, 0, 0};
-        return robotCommands;
+        emit robotCommandUpdate(robotCommands);
+        return;
     }
     Robot& robotDevice = *it;
 

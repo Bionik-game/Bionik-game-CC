@@ -29,7 +29,7 @@ signals:
     void robotCommandUpdate(RobotCommands robotCommands);
 
 public slots:
-    RobotCommands getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec);
+    void getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec);
 };
 
 #endif // MAINKLOCKI_H

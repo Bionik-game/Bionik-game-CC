@@ -13,7 +13,7 @@ MainWalidator::MainWalidator()
     QObject::connect(&dataCollector, &MyDataCollector::dataDropped,
                      [](unsigned int no)
     {
-        std::cerr << "Element number " << no << "was replaced before rest of data arrived in MainWalidator" << std::endl;
+        std::cerr << "Element number " << no << " was replaced before rest of data arrived in MainWalidator" << std::endl;
     });
 }
 
@@ -70,7 +70,7 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
     return robotCommand;
 }
 
-
+#include <iostream>
 void MainWalidator::processData()
 {
     vector<Robot> robotsVec = dataCollector.get<std::vector<Robot>>(0);
@@ -83,6 +83,8 @@ void MainWalidator::processData()
     for(int i = 0; i <robotsVec.size(); i++){
         robotCommandsCorrected = correctionVelocityVector(robotsVec.at(i), robotCommandsCorrected);
     }
+
+    std::cout << robotCommandsCorrected.xCentimetersPerSecond << " " << robotCommandsCorrected.yCentimetersPerSecond << " " << robotCommandsCorrected.zRadiansPerSecond << std::endl;
 
     emit robotCommandUpdateCorrected(robotCommandsCorrected);
 }
