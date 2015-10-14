@@ -39,6 +39,8 @@ set (Klocki_SRC
 set (Joystick_SRC
     Sterowanie_joystick/mainjoystick.cpp
     Sterowanie_joystick/mainjoystick.h
+    Sterowanie_joystick/qjoystick.cpp
+    Sterowanie_joystick/qjoystick.h
 )
 
 set (Walidator_SRC

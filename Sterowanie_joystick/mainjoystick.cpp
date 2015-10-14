@@ -43,7 +43,7 @@ void MainJoystick::checkRequest()
 {
     // Jako guzika przejscia uzylem przycisku "A"
     if(joy.buttons[0] == 1)
-        emit gamePadRequest(true)
+        emit gamePadRequest(true);
     else
         emit gamePadRequest(false);
 }
