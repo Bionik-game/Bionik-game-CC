@@ -54,12 +54,12 @@ MainRozpoznawator::MainRozpoznawator()
 #endif
     /////////////////////// Setup for tracking boxes
     Block red_block("red_block"), green_block("green_block"),
-            blue_block("blue_block"), yellow_block("yellow_block");
+            blue_block("blue_block");
 
     this->block_types.push_back(red_block);
     this->block_types.push_back(green_block);
     this->block_types.push_back(blue_block);
-    this-> block_types.push_back(yellow_block);
+//    this-> block_types.push_back(yellow_block);
     ////////////////////////////////////////////////////////////////
 
 
@@ -472,12 +472,12 @@ void MainRozpoznawator::colourCalibration() {
     this->block_types.clear();
 
     Block red_block("red_block"), green_block("green_block"),
-            blue_block("blue_block"), yellow_block("yellow_block");
+            blue_block("blue_block"); //yellow_block("yellow_block");
 
     this->block_types.push_back(red_block);
     this->block_types.push_back(green_block);
     this->block_types.push_back(blue_block);
-    this-> block_types.push_back(yellow_block);
+ //   this-> block_types.push_back(yellow_block);
     setMouseCallback("Calibration", NULL, NULL);
 
 
