@@ -35,6 +35,7 @@ public:
     const unsigned int topRightBoardId = 1005;   // Id znaczników planszy
     const unsigned int bottomLeftBoardId = 428;
     const unsigned int bottomRightBoardId = 341;
+    const unsigned int videoDeviceId = 3;
 
     std::vector<cv::Point2i> boardCorners;
 
@@ -52,6 +53,8 @@ private:
 
     aruco::MarkerDetector mDetector;
     std::vector<Robot> robotsinfo;
+
+    bool camera_found;
 
 #ifdef DEBUG
     const std::string windowName = "Debug_window";
