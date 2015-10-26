@@ -3,6 +3,8 @@
 const int FRAME_WIDTH = 640;
 const int FRAME_HEIGHT = 480;
 
+unsigned int MIN_OBJECT_AREA;
+
 using namespace  cv;
 using namespace aruco;
 
@@ -70,7 +72,7 @@ MainRozpoznawator::MainRozpoznawator()
     ////////////////////// Other values setup
     this->centerY = FRAME_HEIGHT/2;
     this->centerX = FRAME_WIDTH/2;
-
+    MIN_OBJECT_AREA = 400;
     this->minColRange = 0;
     this->minRowRange = 0;
     this->maxColRange = FRAME_WIDTH;
@@ -201,7 +203,7 @@ void MainRozpoznawator::trackFilteredObject(vector<Block>* blocks, Block theBloc
     //max number of objects to be detected in frame
     const int MAX_NUM_OBJECTS = 50;
     //minimum object area
-    int MIN_OBJECT_AREA = 20 * 20;
+
 
     Mat temp;
     threshold.copyTo(temp);
@@ -428,6 +430,63 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
 
 
         cout << hChannelSum << " " << sChannelSum << " " << vChannelSum << endl;
+
+        Mat temp;
+
+        inRange(cameraFeed, Scalar(hChannelMin,sChannelMin,vChannelMin), Scalar(hChannelMax,sChannelMax,vChannelMax),
+                temp);
+
+        Mat erodeElement = getStructuringElement(MORPH_RECT, Size(3, 3));
+        //dilate with larger element so make sure object is nicely visible
+        Mat dilateElement = getStructuringElement(MORPH_RECT, Size(8, 8));
+
+        erode(temp, temp, erodeElement);
+        erode(temp, temp, erodeElement);
+
+        dilate(temp, temp, dilateElement);
+        dilate(temp, temp, dilateElement);
+
+        //these two vectors needed for output of findContours
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        //find contours of filtered image using openCV findContours function
+        findContours(temp, contours, hierarchy, CV_RETR_CCOMP,
+                CV_CHAIN_APPROX_SIMPLE);
+
+        float minDistance;
+        int minDistanceId;
+
+        if (hierarchy.size() > 0) {
+
+            for (int index = 0; index >= 0; index = hierarchy[index][0]) {
+                Moments moment = moments((cv::Mat) contours[index]);
+                double area = moment.m00;
+                if (area > 20) {
+
+                    int xPos = moment.m10 / area;
+                    int yPos = moment.m01 / area;
+                    if( index == 0){
+                        minDistance = sqrt((xPos-x)*(xPos-x) + (yPos-y)*(yPos-y));
+                        minDistanceId = 0;
+                    }else {
+                        float distance = sqrt((xPos-x)*(xPos-x) + (yPos-y)*(yPos-y));
+                        if( distance < minDistance ){
+                            minDistance = distance;
+                            minDistanceId = index;
+                        }
+
+                    }
+                }
+            }
+
+
+        }
+        Moments moment = moments((cv::Mat) contours[minDistanceId]);
+        MIN_OBJECT_AREA = 0.5*moment.m00;
+        cout << "MIN_OBJECT_AREA = " << MIN_OBJECT_AREA << endl;
+
+
+
   //      imshow("Cropped", croppedFeed);
         *colours_calibrated += 1;
 
