@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <Common-utils/mapelements.h>
+#include "qjoystick.h"
 
 class MainJoystick : public QObject
 {
@@ -17,6 +18,8 @@ private:
     QTimer requestChecker;
     bool padRequest;
 
+    QJoystick joy;
+
 public:
     explicit MainJoystick(unsigned robotId, QString device);
 
@@ -25,7 +28,7 @@ signals:
     void robotCommandUpdate(RobotCommands robotCommands);
 
 public slots:
-    RobotCommands getCommands();
+    void getCommands();
     void checkRequest();
 };
 

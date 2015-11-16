@@ -13,13 +13,24 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::updateRobotCommands(RobotCommands robotCommands)
+void MainWindow::updateRobotCommandsBionik(RobotCommands robotCommands)
 {
-    ui->xSpeedValue->setText(QString::number(robotCommands.xCentimetersPerSecond));
-    ui->ySpeedValue->setText(QString::number(robotCommands.yCentimetersPerSecond));
-    ui->rotationValue->setText(QString::number(robotCommands.zRadiansPerSecond));
+    ui->xSpeedValue->setNum(robotCommands.xCentimetersPerSecond);
+    ui->ySpeedValue->setNum(robotCommands.yCentimetersPerSecond);
+    ui->rotationValue->setNum(robotCommands.zRadiansPerSecond);
 }
-
+void MainWindow::updateRobotCommandsCzerwony(RobotCommands robotCommands)
+{
+    ui->xSpeedVaCzerwony->setNum(robotCommands.xCentimetersPerSecond);
+    ui->ySpeedVaCzerwony->setNum(robotCommands.yCentimetersPerSecond);
+    ui->rotateVaCzerwony->setNum(robotCommands.zRadiansPerSecond);
+}
+void MainWindow::updateRobotCommandsNiebieski(RobotCommands robotCommands)
+{
+    ui->xSpeedVaNiebieski->setNum(robotCommands.xCentimetersPerSecond);
+    ui->ySpeedVaNiebieski->setNum(robotCommands.yCentimetersPerSecond);
+    ui->rotateVaNiebieski->setNum(robotCommands.zRadiansPerSecond);
+}
 void MainWindow::closeEvent(QCloseEvent *)
 {
     emit quittingApplication();

@@ -23,8 +23,9 @@ signals:
     void quittingApplication();
 
 public slots:
-    void updateRobotCommands(RobotCommands robotCommands);
-
+    void updateRobotCommandsBionik(RobotCommands robotCommands);
+    void updateRobotCommandsCzerwony(RobotCommands robotCommands);
+    void updateRobotCommandsNiebieski(RobotCommands robotCommands);
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);

@@ -17,8 +17,8 @@
    <widget class="QLabel" name="xSpeedLabel">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>120</y>
+      <x>310</x>
+      <y>350</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QLabel" name="ySpeedLabel">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>160</y>
+      <x>310</x>
+      <y>390</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -43,8 +43,8 @@
    <widget class="QLabel" name="rotationLabel">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>200</y>
+      <x>310</x>
+      <y>430</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -56,8 +56,8 @@
    <widget class="QLabel" name="xSpeedValue">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>120</y>
+      <x>390</x>
+      <y>350</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -69,8 +69,8 @@
    <widget class="QLabel" name="ySpeedValue">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>160</y>
+      <x>400</x>
+      <y>390</y>
       <width>67</width>
       <height>17</height>
      </rect>
@@ -82,14 +82,209 @@
    <widget class="QLabel" name="rotationValue">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>200</y>
+      <x>400</x>
+      <y>430</y>
       <width>67</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
      <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>310</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>gamepadBionik:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>20</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>gamepadCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>586</x>
+      <y>20</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>gamepadNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>xSpeedCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ySpeedCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>rotationCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="xSpeedVaCzerwony">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>60</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>xSpeedVaCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ySpeedVaCzerwony">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>90</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ySpeedVaCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rotateVaCzerwony">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>120</y>
+      <width>131</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>rotateVaCzerwony</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>60</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>xSpeedNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>90</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ySpeedNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>120</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>rotationNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="xSpeedVaNiebieski">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>60</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>xSpeedVaNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ySpeedVaNiebieski">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>90</y>
+      <width>141</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ySpeedVaNiebieski</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rotateVaNiebieski">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>120</y>
+      <width>131</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>rotateVaNiebieski</string>
     </property>
    </widget>
   </widget>
