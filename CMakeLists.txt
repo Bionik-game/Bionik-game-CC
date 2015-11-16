@@ -85,8 +85,6 @@ add_executable(${PROJECT_NAME}
     ${CommonUtils_SRC}
 )
 
-message(XXX ${JsonRpcCpp})
-
 target_link_libraries(${PROJECT_NAME}
     Qt5::Widgets
     ${OpenCV_LIBS}

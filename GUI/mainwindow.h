@@ -30,11 +30,12 @@ signals:
     void startBoardConfiguration();
 
 public slots:
-    void updateRobotCommands(RobotCommands robotCommands);
+    void updateRobotCommandsBionik(RobotCommands robotCommands);
+    void updateRobotCommandsCzerwony(RobotCommands robotCommands);
+    void updateRobotCommandsNiebieski(RobotCommands robotCommands);
     void updateMainImage( cv::Mat frame );
     void updateColourCalibImage( cv::Mat frame );
     void updateBoardConfImage( cv::Mat frame );
-
     // QWidget interface
 protected:
     void closeEvent(QCloseEvent *);
