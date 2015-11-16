@@ -36,10 +36,16 @@ MainRozpoznawator::MainRozpoznawator()
     : rythm(this)
 {
     /////////////////////// Camera capture setup
-    this->cameraCapture.open(videoDeviceId);
-    //set height and width of capture frame
-    cameraCapture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
-    cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
+
+    if( this->cameraCapture.open(videoDeviceId) ){
+        //set height and width of capture frame
+        camera_found = true;
+        cameraCapture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
+        cameraCapture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
+    }else {
+        camera_found = false;
+    }
+
     ////////////////////////////////////////////////////////////////
 
 
@@ -48,12 +54,12 @@ MainRozpoznawator::MainRozpoznawator()
 #endif
     /////////////////////// Setup for tracking boxes
     Block red_block("red_block"), green_block("green_block"),
-            blue_block("blue_block"), yellow_block("yellow_block");
+            blue_block("blue_block");
 
     this->block_types.push_back(red_block);
     this->block_types.push_back(green_block);
     this->block_types.push_back(blue_block);
-    this-> block_types.push_back(yellow_block);
+//    this-> block_types.push_back(yellow_block);
     ////////////////////////////////////////////////////////////////
 
 
@@ -466,12 +472,12 @@ void MainRozpoznawator::colourCalibration() {
     this->block_types.clear();
 
     Block red_block("red_block"), green_block("green_block"),
-            blue_block("blue_block"), yellow_block("yellow_block");
+            blue_block("blue_block"); //yellow_block("yellow_block");
 
     this->block_types.push_back(red_block);
     this->block_types.push_back(green_block);
     this->block_types.push_back(blue_block);
-    this-> block_types.push_back(yellow_block);
+ //   this-> block_types.push_back(yellow_block);
     setMouseCallback("Calibration", NULL, NULL);
 
 
@@ -625,8 +631,18 @@ void MainRozpoznawator::mainWork()
     this->robotsinfo.clear();
     this->colorBoxesInfo.clear();
 
-    this->cameraCapture.read(this->cameraFrame);
+    if( camera_found ) {
+        this->cameraCapture.read(this->cameraFrame);
   //  flip(this->cameraFrame, this->cameraFrame, 1);
+    }else{
+        this->cameraFrame = Mat::zeros(FRAME_HEIGHT,FRAME_WIDTH,CV_8UC3);
+        putText(this->cameraFrame, "Camera not found! ", Point(0, 50),
+                1, 2, Scalar(0, 0, 255), 2);
+        putText(this->cameraFrame, "Check videoDeviceId or connection ", Point(0, 100),
+                1, 2, Scalar(0, 0, 255), 2);
+
+
+    }
 
 
     crop2Board();

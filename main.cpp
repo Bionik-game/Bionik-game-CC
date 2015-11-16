@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     MainWalidator* walidator = new MainWalidator;
     threader.runInThread(walidator);
 
-    MainKomunikacja* komunikacja = new MainKomunikacja("192.168.0.21", "192.168.0.21");
+    MainKomunikacja* komunikacja = new MainKomunikacja("192.168.0.20", "192.168.0.20");
     threader.runInThread(komunikacja);
 
 
