@@ -1,4 +1,5 @@
 #include "mainkomunikacja.h"
+#include <sstream>
 using namespace jsonrpc;
 
 MainKomunikacja::MainKomunikacja(QMap<unsigned, QString> ipAddresses)
@@ -26,7 +27,11 @@ void MainKomunikacja::robotCommandUpdate(RobotCommands robotCommands)
 {
     QMap<unsigned, Connection>::Iterator it = ipAddresses.find(robotCommands.robotId);
     if (it == ipAddresses.end())
-        throw std::runtime_error("(MainKomunikacja::robotCommandUpdate) Got robotId that was not specified in constructor.");
+    {
+        std::ostringstream oss;
+        oss << "(MainKomunikacja::robotCommandUpdate) Got robotId that was not specified in constructor. Id is: " << robotCommands.robotId << ".";
+        throw std::runtime_error(oss.str().c_str());
+    }
 
     StubClient& stubClient = *(it.value().stubClent);
     try

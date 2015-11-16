@@ -310,7 +310,7 @@ void MainRozpoznawator::findRobots() {
         if( markers.at(i).id == this->robot1Id  ){
             angle  = calculate_angle(markers[i]);
             Robot robot;
-            robot.robotId = 1;
+            robot.robotId = this->robot1Id;
             robot.rotationRadians = angle;
             robot.xCentimeters = markers.at(i).getCenter().x - this->centerX + this->minColRange;
             robot.yCentimeters = markers.at(i).getCenter().y - this->centerY + this->minRowRange;
@@ -325,7 +325,7 @@ void MainRozpoznawator::findRobots() {
         } else if( markers.at(i).id == this->robot2Id ){
             angle  = calculate_angle(markers[i]);
             Robot robot;
-            robot.robotId = 2;
+            robot.robotId = this->robot2Id;
             robot.rotationRadians = angle;
             robot.xCentimeters = markers.at(i).getCenter().x - this->centerX + this->minColRange;
             robot.yCentimeters = markers.at(i).getCenter().y - this->centerY + this->minRowRange;

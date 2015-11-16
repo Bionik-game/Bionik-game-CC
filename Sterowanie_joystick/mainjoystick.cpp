@@ -6,7 +6,12 @@ MainJoystick::MainJoystick(unsigned robotId, QString device)
 {
     QObject::connect(&requestChecker, &QTimer::timeout, this, &MainJoystick::checkRequest);
     requestChecker.start(200);
+
     joy.setJoystick(0); //TODO
+    joy.getdata();
+    std::cout << joy.joystickName(0).toStdString() << " " << joy.axis.size() << std::endl;
+    if (joy.axis.size() != 6)
+        throw std::runtime_error("Either wrong joystick or change from D to X.");
 }
 
 void MainJoystick::getCommands()
@@ -45,8 +50,8 @@ void MainJoystick::getCommands()
 void MainJoystick::checkRequest()
 {
     joy.getdata();
-//     Jako guzika przejscia uzylem przycisku "A"
-    if(joy.buttons[0] == 1)
+//     Jako guzika przejscia uzylem przycisku "LB"
+    if(joy.buttons[4] == 1)
         emit gamePadRequest(true);
     else
         emit gamePadRequest(false);

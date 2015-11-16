@@ -1,0 +1,6 @@
+SUBSYSTEM=="usb", DRIVERS=="usb", ATTRS{serial}=="83829C20", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21f", SYMLINK+="gamepadNiebieski"
+
+SUBSYSTEM=="usb", DRIVERS=="usb", ATTRS{serial}=="2EB19BFD", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21f", SYMLINK+="gamepadCzerwony"
+
+SUBSYSTEM=="usb", DRIVERS=="usb", ATTRS{serial}=="5F989167", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21f", SYMLINK+="gamepadBionik"
+
