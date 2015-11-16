@@ -4,7 +4,7 @@
 #include <cmath>
 
 MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxColorSet)
-    : maxLength(50.0), robotId(robotId),boxColorSet(boxColorSet)
+    : maxLength(100.0), robotId(robotId),boxColorSet(boxColorSet)
 {
 }
 
@@ -27,6 +27,8 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
     }
 
     vect2d moveVec;
+    moveVec.x = 0;
+    moveVec.y = 0;
     for(ColorBox& colorBox : colorBoxVecFiltered)
     {
         vect2d robot;
@@ -40,15 +42,27 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
 
         normalVec.x = robot.x-box.x;
         normalVec.y = robot.y-box.y;
+
         double length = sqrt(normalVec.x*normalVec.x+normalVec.y*normalVec.y);
+        normalVec.x = normalVec.x/length;       //Dlugosc normalnego wektora ma byc 1
+        normalVec.y = normalVec.y/length;
+
+        float robotAngleRad = robotDevice.rotationRadians;
+        float cs = cos(robotAngleRad);
+        float sn = sin(robotAngleRad);
+        float tempX = normalVec.x*cs - normalVec.y*sn;
+        float tempY = normalVec.x * sn + normalVec.y * cs;
+
 
         if(length<maxLength)
         {
             double lengthRatio = (maxLength - length) / maxLength; //values between 0 and 1
-            double areaMultiplicator = colorBox.area; //easier to modify later
+            double areaMultiplicator = 1;//colorBox.area; //easier to modify later
 
             moveVec.x += normalVec.x * lengthRatio * areaMultiplicator;
             moveVec.y += normalVec.y * lengthRatio * areaMultiplicator;
+            moveVec.x = moveVec.x*1000;
+            moveVec.y = moveVec.y*1000;
         }
     }
 

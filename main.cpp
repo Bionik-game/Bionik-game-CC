@@ -39,14 +39,8 @@ int main(int argc, char *argv[])
     Threader::ThreadKey threadKey = threader.runInThread(priorytetyzator);
 
     std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN};
-    MainKlocki* klocki = new MainKlocki(1, colorSet);
+    MainKlocki* klocki = new MainKlocki(125, colorSet);
     threader.runInThread(klocki, threadKey);
-
-    MainJoystick* gamepadBionik = new MainJoystick(1, "/dev/gamepadBionik");
-    threader.runInThread(gamepadBionik, threadKey);
-
-    MainJoystick* gamepadCzerwony = new MainJoystick(2, "/dev/gamepadCzerwony");
-    threader.runInThread(gamepadCzerwony, threadKey);
 
     MainJoystick* gamepadNiebieski = new MainJoystick(125, "/dev/gamepadNiebieski");
     threader.runInThread(gamepadNiebieski, threadKey);
@@ -55,7 +49,7 @@ int main(int argc, char *argv[])
     threader.runInThread(walidator);
 
     QMap<unsigned, QString> ipAddresses;
-    ipAddresses.insert(125 ,"192.168.0.20");
+    ipAddresses.insert(125 ,"192.168.0.20:30000");
     MainKomunikacja* komunikacja = new MainKomunikacja(ipAddresses);
     threader.runInThread(komunikacja);
 
@@ -65,9 +59,10 @@ int main(int argc, char *argv[])
     /**
      * Wyświetlanie informacji w oknie aplikacji
      */
-    QObject::connect(gamepadBionik, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsBionik);
-    QObject::connect(gamepadCzerwony, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsCzerwony);
-    QObject::connect(gamepadNiebieski, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsNiebieski);
+//    QObject::connect(gamepadBionik, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsBionik);
+//    QObject::connect(gamepadCzerwony, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsCzerwony);
+//    QObject::connect(gamepadNiebieski, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsNiebieski);
+    QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, &window, &MainWindow::updateRobotCommandsNiebieski);
 
     /**
      * Łączenie danych między wątkami
@@ -76,7 +71,9 @@ int main(int argc, char *argv[])
     QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, walidator, &MainWalidator::gameState);
     QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsColors, klocki, &MainKlocki::getCommands);
     QObject::connect(klocki, &MainKlocki::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
-    QObject::connect(gamepadBionik, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
+    QObject::connect(gamepadNiebieski, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
+    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, gamepadNiebieski, &MainJoystick::getCommands);
+    QObject::connect(gamepadNiebieski, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
     QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
     QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidator, &MainWalidator::boardPos);
 
@@ -92,18 +89,6 @@ int main(int argc, char *argv[])
     QObject::connect( rozpoznawator, &MainRozpoznawator::updateColourCalibImage, &window, &MainWindow::updateColourCalibImage ) ;
     QObject::connect( rozpoznawator, &MainRozpoznawator::updateBoardConfImage, &window, &MainWindow::updateBoardConfImage);
 
-
-    //gamepadBionik
-//    QObject::connect(gamepadBionik, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
-//    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, gamepadBionik, &MainJoystick::getCommands);
-
-    //gamepadCzerwony
-//    QObject::connect(gamepadCzerwony, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
-//    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, gamepadCzerwony, &MainJoystick::getCommands);
-
-    //gamepadNiebieski
-    QObject::connect(gamepadNiebieski, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
-    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, gamepadNiebieski, &MainJoystick::getCommands);
     /***********************/
 
     /**

@@ -46,8 +46,12 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
             yi = this->boardCornersVec.at(i).y ;
             yj = this->boardCornersVec.at(j).y ;
 
+
+
             velVector.x = robotCommand.xCentimetersPerSecond;
             velVector.y = robotCommand.yCentimetersPerSecond;
+
+            cout<<velVector.x << " " << velVector.y << endl;
 
 
             if( calcDistPointToLine(this->boardCornersVec.at(i),this->boardCornersVec.at(j), Point2i(robot.xCentimeters,robot.yCentimeters)) < MIN_DISTANCE_TO_WALL_PIXELS ){
@@ -70,7 +74,6 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
     return robotCommand;
 }
 
-#include <iostream>
 void MainWalidator::processData()
 {
     vector<Robot> robotsVec = dataCollector.get<std::vector<Robot>>(0);
@@ -79,12 +82,11 @@ void MainWalidator::processData()
 
     RobotCommands robotCommandsCorrected = dataCollector.get<RobotCommands>(2);
 
-
     for(int i = 0; i <robotsVec.size(); i++){
         robotCommandsCorrected = correctionVelocityVector(robotsVec.at(i), robotCommandsCorrected);
     }
 
-    std::cout << robotCommandsCorrected.xCentimetersPerSecond << " " << robotCommandsCorrected.yCentimetersPerSecond << " " << robotCommandsCorrected.zRadiansPerSecond << std::endl;
+
 
     emit robotCommandUpdateCorrected(robotCommandsCorrected);
 }

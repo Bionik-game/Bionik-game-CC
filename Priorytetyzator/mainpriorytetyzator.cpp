@@ -5,6 +5,7 @@ MainPriorytetyzator::MainPriorytetyzator()
 {
 }
 
+#include <iostream>
 void MainPriorytetyzator::gameState(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
     if (gamePad)
