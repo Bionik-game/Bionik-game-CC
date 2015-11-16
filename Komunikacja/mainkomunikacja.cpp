@@ -1,49 +1,41 @@
 #include "mainkomunikacja.h"
 using namespace jsonrpc;
 
-MainKomunikacja::MainKomunikacja(QString ipAddress,QString ipAddress2)
-    : ipAddress(ipAddress),
-      httpclient_1(ipAddress.toStdString()),
-      httpclient_2(ipAddress2.toStdString())// zmienna ipAddress (składowa modułu mainKomunikacja ofc) jest tu generalnie zbędna
+MainKomunikacja::MainKomunikacja(QMap<unsigned, QString> ipAddresses)
 {
+    for(unsigned robotId : ipAddresses.keys())
+    {
+        Connection connection;
+        connection.httpClient = new HttpClient(ipAddresses[robotId].toStdString());
+        connection.stubClent = new StubClient(*connection.httpClient);
+        this->ipAddresses.insert(robotId, connection);
+    }
 }
 
-#include <iostream>
+MainKomunikacja::~MainKomunikacja()
+{
+    for(unsigned robotId : ipAddresses.keys())
+    {
+        Connection& connection = ipAddresses[robotId];
+        delete connection.stubClent;
+        delete connection.httpClient;
+    }
+}
+
 void MainKomunikacja::robotCommandUpdate(RobotCommands robotCommands)
 {
-    std::cout << robotCommands.xCentimetersPerSecond << std::endl;
+    QMap<unsigned, Connection>::Iterator it = ipAddresses.find(robotCommands.robotId);
+    if (it == ipAddresses.end())
+        throw std::runtime_error("(MainKomunikacja::robotCommandUpdate) Got robotId that was not specified in constructor.");
 
-    //Send commands to provided ip using Json-RPC client
-    switch(robotCommands.robotId){
-    case 1:
+    StubClient& stubClient = *(it.value().stubClent);
+    try
     {
-        StubClient c(httpclient_1);
-          try
-            {
-                ret_code = c.moveRobot(robotCommands.xCentimetersPerSecond,robotCommands.yCentimetersPerSecond,robotCommands.zRadiansPerSecond).c_str();
-                c.notifyServer();
-            }
-          catch (JsonRpcException e)
-            {
-                std::cerr << e.what() << std::endl;
-            }
-        break;
+        ret_code = stubClient.moveRobot(robotCommands.xCentimetersPerSecond,robotCommands.yCentimetersPerSecond,robotCommands.zRadiansPerSecond).c_str();
+        stubClient.notifyServer();
     }
-    case 2:
+    catch (JsonRpcException e)
     {
-        StubClient c(httpclient_2);
-          try
-            {
-                ret_code = c.moveRobot(robotCommands.xCentimetersPerSecond,robotCommands.yCentimetersPerSecond,robotCommands.zRadiansPerSecond).c_str();
-                c.notifyServer();
-            }
-          catch (JsonRpcException e)
-            {
-                std::cerr << e.what() << std::endl;
-            }
-        break;
-    }
-    default:
-        std::cerr<<"Bad robotId !\n";
+        std::cerr << e.what() << std::endl;
     }
 }

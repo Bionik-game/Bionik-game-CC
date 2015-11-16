@@ -321,7 +321,7 @@ void MainRozpoznawator::findRobots() {
                             markers[i][0].y), 1, 3,
                     Scalar(0, 0, 255),3);
             markers[i].draw(this->drawFrame,Scalar(0,0,255),2);
-#endif;
+#endif
         } else if( markers.at(i).id == this->robot2Id ){
             angle  = calculate_angle(markers[i]);
             Robot robot;
@@ -336,7 +336,7 @@ void MainRozpoznawator::findRobots() {
                             markers[i][0].y), 1, 3,
                     Scalar(0, 0, 255),3);
             markers[i].draw(this->drawFrame,Scalar(0,0,255),2);
-#endif;
+#endif
         }
 
     }

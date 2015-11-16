@@ -54,7 +54,9 @@ int main(int argc, char *argv[])
     MainWalidator* walidator = new MainWalidator;
     threader.runInThread(walidator);
 
-    MainKomunikacja* komunikacja = new MainKomunikacja("192.168.0.20", "192.168.0.20");
+    QMap<unsigned, QString> ipAddresses;
+    ipAddresses.insert(125 ,"192.168.0.20");
+    MainKomunikacja* komunikacja = new MainKomunikacja(ipAddresses);
     threader.runInThread(komunikacja);
 
 
