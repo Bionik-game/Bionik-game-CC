@@ -23,8 +23,8 @@ struct Robot
 struct ColorBox
 {
     enum Color {RED, GREEN, BLUE} color;
-    long xCentimeters;
-    long yCentimeters;
+    signed long xCentimeters;
+    signed long yCentimeters;
     double area;
 };
 

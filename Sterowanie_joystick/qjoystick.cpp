@@ -13,14 +13,14 @@ QJoystick::QJoystick()
 
 int QJoystick::currentJoystick()
 {
-    return sdl::SDL_JoystickIndex(m_joystick);
+    return 0;//sdl:SDL_Joystick   //SDL_JoystickIndex(m_joystick);
 }
 
 QString QJoystick::joystickName(int js)
 {
     Q_ASSERT(js < availableJoysticks());
     Q_ASSERT(js >= 0);
-    return QString(sdl::SDL_JoystickName(js));
+    return QString(sdl::SDL_JoystickNameForIndex(js));
 }
 
 int QJoystick::joystickNumAxes(int js)

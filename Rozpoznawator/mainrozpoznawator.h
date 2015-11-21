@@ -6,6 +6,7 @@
 #include <vector>
 #include <math.h>
 #include <string>
+#include <stdio.h>
 
 #include <QThread>
 #include <QVector>
@@ -35,7 +36,7 @@ public:
     const unsigned int topRightBoardId = 1005;   // Id znaczników planszy
     const unsigned int bottomLeftBoardId = 428;
     const unsigned int bottomRightBoardId = 341;
-    const unsigned int videoDeviceId = 0;
+    const unsigned int videoDeviceId = 1;
 
     std::vector<cv::Point2i> boardCorners;
 
@@ -61,13 +62,13 @@ private:
     cv::Mat drawFrame;
 #endif
 
-    unsigned int centerX;   // Współrzędna środka klatki
-    unsigned int centerY;   // Współrzędna środka klatki
+    int centerX;   // Współrzędna środka klatki
+    int centerY;   // Współrzędna środka klatki
 
-    unsigned int minColRange;   // Wartości określające przedziały wartości
-    unsigned int maxColRange;   // do wycięcia z klatki, po wykryciu planszy
-    unsigned int minRowRange;
-    unsigned int maxRowRange;
+     int minColRange;   // Wartości określające przedziały wartości
+     int maxColRange;   // do wycięcia z klatki, po wykryciu planszy
+     int minRowRange;
+     int maxRowRange;
 
 
 public:

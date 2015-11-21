@@ -87,7 +87,6 @@ void MainWalidator::processData()
     }
 
 
-
     emit robotCommandUpdateCorrected(robotCommandsCorrected);
 }
 

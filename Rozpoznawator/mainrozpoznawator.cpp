@@ -168,8 +168,9 @@ void MainRozpoznawator::findBoxes(){
         ColorBox box;
         box.color = color;
         box.xCentimeters = this->all_blocks.at(i).getXPos() - centerX + this->minRowRange;
-        box.yCentimeters = this->all_blocks.at(i).getYPos() - centerY + this->minRowRange;
+        box.yCentimeters = this->all_blocks.at(i).getYPos() - centerY + this->minColRange;
         box.area = this->all_blocks.at(i).getArea();
+
         this->colorBoxesInfo.push_back(box);
     }
 
@@ -717,6 +718,7 @@ void MainRozpoznawator::mainWork()
 //    imshow(windowName, this->drawFrame);
    emit updateMainImage( this->drawFrame);
 #endif
+
 
 
    emit gameState(this->robotsinfo, this->colorBoxesInfo);

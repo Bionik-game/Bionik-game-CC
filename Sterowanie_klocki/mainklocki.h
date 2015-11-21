@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <set>
+#include <iostream>
 
 #include "Common-utils/mapelements.h"
 #include "Common-utils/datacollector.h"

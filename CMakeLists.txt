@@ -93,6 +93,6 @@ target_link_libraries(${PROJECT_NAME}
     ${JsonRpcCppClient_LIB}
     ${JsonCpp_LIB}
     ${microhttpd_LIB}
-    SDL
+    SDL2
 )
 
