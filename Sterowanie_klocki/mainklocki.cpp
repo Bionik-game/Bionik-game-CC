@@ -6,7 +6,7 @@
 using namespace std;
 
 MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxColorSet)
-    : maxLength(300.0), robotId(robotId),boxColorSet(boxColorSet)
+    : maxLength(400.0), robotId(robotId),boxColorSet(boxColorSet)
 {
 }
 
@@ -55,7 +55,7 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
 
         //cout << normalVec.x << " " << normalVec.y << endl;
 
-        float robotAngleRad = robotDevice.rotationRadians;
+        float robotAngleRad = -robotDevice.rotationRadians;
         float cs = cos(robotAngleRad);
         float sn = sin(robotAngleRad);
         float tempX = normalVec.x*cs - normalVec.y*sn;
@@ -66,17 +66,23 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
 
         if(length<maxLength)
         {
-            double lengthRatio = (maxLength - length) / maxLength; //values between 0 and 1
+            double lengthRatio = (maxLength - length) / (maxLength*0.8); //values between 0 and 1
             double areaMultiplicator = 1;//colorBox.area; //easier to modify later
          //   cout << lengthRatio << endl;
-            moveVec.x += normalVec.x * lengthRatio * areaMultiplicator;
+            moveVec.x += normalVec.x * lengthRatio*lengthRatio * areaMultiplicator;
             moveVec.y += normalVec.y * lengthRatio * areaMultiplicator;
 
         //    cout << moveVec.x << " " << moveVec.y << endl;
         }
     }
     moveVec.x = moveVec.x*1000;
-    moveVec.y = moveVec.y*1000;
+    moveVec.y = -moveVec.y*1000;
+    if(moveVec.x > 1000){
+        moveVec.x = 1000;
+    }
+    if(moveVec.y > 1000){
+        moveVec.y = 1000;
+    }
     RobotCommands robotCommands = {robotId, moveVec.x, moveVec.y, 0};
 
       //  cout << robotCommands.robotId << " " << robotCommands.xCentimetersPerSecond << " " << robotCommands.yCentimetersPerSecond << endl;

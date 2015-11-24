@@ -72,7 +72,7 @@ MainRozpoznawator::MainRozpoznawator()
     ////////////////////// Other values setup
     this->centerY = FRAME_HEIGHT/2;
     this->centerX = FRAME_WIDTH/2;
-    MIN_OBJECT_AREA = 400;
+    MIN_OBJECT_AREA = 2300;
     this->minColRange = 0;
     this->minRowRange = 0;
     this->maxColRange = FRAME_WIDTH;
@@ -355,6 +355,7 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
 
 
     if (event == EVENT_LBUTTONDOWN) {
+
         int margin = 20;
         int h_colour_tolerance = 10;
         int s_colour_tolerance = 100;
@@ -457,6 +458,8 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
         float minDistance;
         int minDistanceId;
 
+
+
         if (hierarchy.size() > 0) {
 
             for (int index = 0; index >= 0; index = hierarchy[index][0]) {
@@ -482,7 +485,9 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
 
 
         }
+
         Moments moment = moments((cv::Mat) contours[minDistanceId]);
+        cout << "test" << endl;
         MIN_OBJECT_AREA = 0.5*moment.m00;
         cout << "MIN_OBJECT_AREA = " << MIN_OBJECT_AREA << endl;
 

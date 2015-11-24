@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     threader.runInThread(walidator);
 
     QMap<unsigned, QString> ipAddresses;
-    ipAddresses.insert(125 ,"192.168.0.20:30000");
+    ipAddresses.insert(125 ,"192.168.0.20:30001");
     MainKomunikacja* komunikacja = new MainKomunikacja(ipAddresses);
     threader.runInThread(komunikacja);
 

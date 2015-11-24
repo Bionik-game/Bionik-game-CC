@@ -5,7 +5,8 @@
 using namespace std;
 using namespace cv;
 
-#define MIN_DISTANCE_TO_WALL_PIXELS 10
+#define MIN_DISTANCE_TO_WALL_PIXELS 800
+
 
 MainWalidator::MainWalidator()
 {
