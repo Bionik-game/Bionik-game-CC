@@ -12,6 +12,7 @@ MainJoystick::MainJoystick(unsigned robotId, QString device)
     std::cout << joy.joystickName(0).toStdString() << " " << joy.axis.size() << std::endl;
     if (joy.axis.size() != 6);
         //throw std::runtime_error("Either wrong joystick or change from D to X.");
+
 }
 
 void MainJoystick::getCommands()
