@@ -5,8 +5,9 @@
 using namespace std;
 using namespace cv;
 
-#define MIN_DISTANCE_TO_WALL_PIXELS 800
-
+#define MIN_DISTANCE_TO_WALL_PIXELS 170
+const int FRAME_WIDTH = 800;
+const int FRAME_HEIGHT = 600;
 
 MainWalidator::MainWalidator()
 {
@@ -16,6 +17,33 @@ MainWalidator::MainWalidator()
     {
         std::cerr << "Element number " << no << " was replaced before rest of data arrived in MainWalidator" << std::endl;
     });
+
+    normalVectors.clear();
+    vect2d vec;
+    vec.x = 0.0;
+    vec.y = -1.0;
+    normalVectors.push_back(vec);
+    vec.x = 1.0;
+    vec.y = 0.0;
+    normalVectors.push_back(vec);
+    vec.x = 0.0;
+    vec.y = 1.0;
+    normalVectors.push_back(vec);
+    vec.x = -1.0;
+    vec.y = 0.0;
+    normalVectors.push_back(vec);
+
+    this->boardCornersVec.push_back(Point2i(0,0));     //Lewy gorny
+    this->boardCornersVec.push_back(Point2i(FRAME_WIDTH,0)); //Prawy gorny
+    this->boardCornersVec.push_back(Point2i(FRAME_WIDTH,FRAME_HEIGHT)); //Prawy dolny
+    this->boardCornersVec.push_back(Point2i(0,FRAME_HEIGHT));       //Lewy dolny
+
+
+    cout << normalVectors.size() << endl;
+    for(int i =0; i< normalVectors.size(); i++){
+        cout << normalVectors.at(i).x << " " << normalVectors.at(i).y << endl;
+    }
+
 }
 
 double calcDistPointToLine( cv::Point2i linePoint1, cv::Point2i linePoint2, cv::Point2i robotPos){
@@ -25,53 +53,96 @@ double calcDistPointToLine( cv::Point2i linePoint1, cv::Point2i linePoint2, cv::
     return distance;
 }
 
-struct vect2d {
-    double x;
-    double y;
-};
+
+
+double computeDistance( int robotX, int robotY, Point2i linePoint1, Point2i linePoint2 ){
+
+    int point1y = linePoint1.y;
+    int point1x = linePoint1.x;
+    int point2y = linePoint2.y;
+    int point2x = linePoint2.x;
+
+    double distance = abs((point2y-point1y)*robotX - (point2x-point1x)*robotY + point2x*point1y - point2y*point1x)/(sqrt((point2y-point1y)*(point2y-point1y)+ (point2x-point1x)*(point2x-point1x)));
+    return distance;
+
+}
 
 RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotCommands robotCommand){
 
-    int polyCorners = this->boardCornersVec.size();
-    int   i, j=polyCorners-1 ;
+
+
+    cout << "test1" << endl;
+
+    int polyCorners =  this->boardCornersVec.size();
+    int   i,j;
     int xi,xj,yi,yj;
+
+
+
+
+
+
 
     vect2d normalVector;
     double dotProduct;
     vect2d velVector;
     vect2d correctionVector;
-
-        for (i=0; i<polyCorners; i++) {
+   // cout << polyCorners << endl;
+        for (i=10,j=1; i<polyCorners; ++i,j++) {
+          //  cout << "test" << endl;
+            if(j > 3)
+                   j = 0;
             xi = this->boardCornersVec.at(i).x ;
             xj = this->boardCornersVec.at(j).x ;
             yi = this->boardCornersVec.at(i).y ;
             yj = this->boardCornersVec.at(j).y ;
 
+            cout << "Poly:  " << polyCorners << endl;
 
 
             velVector.x = robotCommand.xCentimetersPerSecond;
             velVector.y = robotCommand.yCentimetersPerSecond;
 
-            cout<<velVector.x << " " << velVector.y << endl;
+           // cout<<velVector.x << " " << velVector.y << endl;
 
-
-            if( calcDistPointToLine(this->boardCornersVec.at(i),this->boardCornersVec.at(j), Point2i(robot.xCentimeters,robot.yCentimeters)) < MIN_DISTANCE_TO_WALL_PIXELS ){
-                //Calculate vector normal to wall, facing outwards
-                normalVector.x = yi - yj;
+            double distToBorder = computeDistance(robot.xCentimeters,robot.yCentimeters,this->boardCornersVec.at(i),this->boardCornersVec.at(j));//calcDistPointToLine(this->boardCornersVec.at(i),this->boardCornersVec.at(j), Point2i(robot.xCentimeters,robot.yCentimeters));
+           // cout << "distance " << distToBorder << endl;
+            cout << "i: " << i << endl;
+            normalVector = normalVectors.at(i);
+            if( distToBorder < MIN_DISTANCE_TO_WALL_PIXELS ){
+                //Calculate vector normal to wall, facing outwardsn
+               /* normalVector.x = yi - yj; // @mateusz: nie wiem dlaczego tutaj sa yi,yj zamiast x
                 normalVector.y = xj - xi;
                 double length = sqrt(normalVector.x*normalVector.x + normalVector.y*normalVector.y);
                 normalVector.x = normalVector.x/length;
                 normalVector.y = normalVector.y/length;
+                */
                 //Calculate dot product of velocity vector and normal vector
+
+             //   cout << normalVector.x << " " << normalVector.y << "    " << i << endl;
                 dotProduct = velVector.x*normalVector.x + velVector.y*normalVector.y;
                 //Correct the original vector
+
+
                 correctionVector.x = dotProduct*normalVector.x;
+
                 correctionVector.y = dotProduct*normalVector.y;
                 robotCommand.xCentimetersPerSecond -= correctionVector.x;
                 robotCommand.yCentimetersPerSecond -= correctionVector.y;
             }
-
          }
+
+    // @mateusz: dostosowalem kod z mainklocki.cpp do walidatora, tam go usunalem
+   /*float robotAngleRad = -robot.rotationRadians;
+    float cs = cos(robotAngleRad);
+    float sn = sin(robotAngleRad);
+    float tempX = robotCommand.xCentimetersPerSecond*cs - robotCommand.yCentimetersPerSecond*sn;
+    float tempY = robotCommand.xCentimetersPerSecond * sn + robotCommand.yCentimetersPerSecond * cs;
+    robotCommand.xCentimetersPerSecond = tempX;
+    robotCommand.yCentimetersPerSecond = tempY;
+    cout << "X: " <<tempX << endl;
+    cout << "Y: " <<tempY << endl;
+    */// @mateusz: koniec wstawionego kodu
     return robotCommand;
 }
 

@@ -1,7 +1,7 @@
 #include "mainrozpoznawator.h"
 
-const int FRAME_WIDTH = 640;
-const int FRAME_HEIGHT = 480;
+const int FRAME_WIDTH = 800;
+const int FRAME_HEIGHT = 600;
 
 unsigned int MIN_OBJECT_AREA;
 
@@ -407,7 +407,7 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
                 vChannelSum += ptr->z;
             }
         }
-
+       // cout << "test"<<endl;
         hChannelSum = hChannelSum/(croppedFeed.rows * croppedFeed.cols);
         sChannelSum = sChannelSum/(croppedFeed.rows * croppedFeed.cols);
         vChannelSum = vChannelSum/(croppedFeed.rows * croppedFeed.cols);
@@ -470,6 +470,8 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
                     int xPos = moment.m10 / area;
                     int yPos = moment.m01 / area;
                     if( index == 0){
+
+
                         minDistance = sqrt((xPos-x)*(xPos-x) + (yPos-y)*(yPos-y));
                         minDistanceId = 0;
                     }else {
@@ -482,14 +484,13 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
                     }
                 }
             }
+            Moments moment = moments((cv::Mat) contours[minDistanceId]);
 
-
+            MIN_OBJECT_AREA = 0.5*moment.m00;
+            cout << "MIN_OBJECT_AREA = " << MIN_OBJECT_AREA << endl;
         }
 
-        Moments moment = moments((cv::Mat) contours[minDistanceId]);
-        cout << "test" << endl;
-        MIN_OBJECT_AREA = 0.5*moment.m00;
-        cout << "MIN_OBJECT_AREA = " << MIN_OBJECT_AREA << endl;
+
 
 
 

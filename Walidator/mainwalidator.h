@@ -9,9 +9,16 @@ class MainWalidator : public QObject
 {
     Q_OBJECT
 private:
+
+    struct vect2d {
+        double x;
+        double y;
+    };
+
     typedef DataCollector<std::vector<Robot>, std::vector<ColorBox>, RobotCommands> MyDataCollector;
     MyDataCollector dataCollector;
     std::vector<cv::Point2i> boardCornersVec;
+    std::vector<vect2d> normalVectors;
 public:
     explicit MainWalidator();
 

@@ -12,6 +12,7 @@ MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxCol
 
 void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
+
     auto it = std::find(robotVec.begin(), robotVec.end(), robotId);
     if (it == robotVec.end())
     {
@@ -32,7 +33,7 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
     moveVec.x = 0;
     moveVec.y = 0;
 
-    cout << colorBoxVecFiltered.size() << endl;
+   // cout << "test" << endl;
 
     for(ColorBox& colorBox : colorBoxVecFiltered)
     {
@@ -55,14 +56,7 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
 
         //cout << normalVec.x << " " << normalVec.y << endl;
 
-        float robotAngleRad = -robotDevice.rotationRadians;
-        float cs = cos(robotAngleRad);
-        float sn = sin(robotAngleRad);
-        float tempX = normalVec.x*cs - normalVec.y*sn;
-        float tempY = normalVec.x * sn + normalVec.y * cs;
-        normalVec.x = tempX;
-        normalVec.y = tempY;
-
+        // @mateusz: stad wycialem kod obrotu wektora
 
         if(length<maxLength)
         {
@@ -85,7 +79,7 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
     }
     RobotCommands robotCommands = {robotId, moveVec.x, moveVec.y, 0};
 
-      //  cout << robotCommands.robotId << " " << robotCommands.xCentimetersPerSecond << " " << robotCommands.yCentimetersPerSecond << endl;
+        cout << robotCommands.robotId << " " << robotCommands.xCentimetersPerSecond << " " << robotCommands.yCentimetersPerSecond << endl;
 
     emit robotCommandUpdate(robotCommands);
 }
