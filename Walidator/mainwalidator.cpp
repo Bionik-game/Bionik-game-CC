@@ -133,7 +133,7 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
          }
 
     // @mateusz: dostosowalem kod z mainklocki.cpp do walidatora, tam go usunalem
-   /*float robotAngleRad = -robot.rotationRadians;
+   float robotAngleRad = robot.rotationRadians;
     float cs = cos(robotAngleRad);
     float sn = sin(robotAngleRad);
     float tempX = robotCommand.xCentimetersPerSecond*cs - robotCommand.yCentimetersPerSecond*sn;
@@ -142,7 +142,7 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
     robotCommand.yCentimetersPerSecond = tempY;
     cout << "X: " <<tempX << endl;
     cout << "Y: " <<tempY << endl;
-    */// @mateusz: koniec wstawionego kodu
+    // @mateusz: koniec wstawionego kodu
     return robotCommand;
 }
 
