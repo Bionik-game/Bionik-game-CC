@@ -4,6 +4,7 @@
 #include <QObject>
 #include "Common-utils/datacollector.h"
 #include "Common-utils/mapelements.h"
+#include "Rozpoznawator/mainrozpoznawator.h"
 
 class MainWalidator : public QObject
 {

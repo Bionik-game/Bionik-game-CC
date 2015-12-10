@@ -22,6 +22,7 @@ private:
     const double maxLength;
     unsigned robotId;
     std::set<ColorBox::Color> boxColorSet;
+    unsigned int MIN_OBJECT_AREA;
 
 public:
     MainKlocki(unsigned robotId, const std::set<ColorBox::Color> &boxColorSet);

@@ -2,16 +2,27 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
+
+
 
 MainKlocki::MainKlocki(unsigned robotId, const std::set<ColorBox::Color>& boxColorSet)
     : maxLength(400.0), robotId(robotId),boxColorSet(boxColorSet)
 {
+
 }
 
 void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> colorBoxVec)
 {
+
+    fstream file;
+    file.open("minimal_size_data.txt", ios::in);
+    if(!file.is_open()){
+        std::cout << "File not found" << endl;
+    }else
+        file >> MIN_OBJECT_AREA;
 
     auto it = std::find(robotVec.begin(), robotVec.end(), robotId);
     if (it == robotVec.end())
@@ -61,9 +72,9 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
         if(length<maxLength)
         {
             double lengthRatio = (maxLength - length) / (maxLength*0.8); //values between 0 and 1
-            double areaMultiplicator = 1;//colorBox.area; //easier to modify later
-         //   cout << lengthRatio << endl;
-            moveVec.x += normalVec.x * lengthRatio*lengthRatio * areaMultiplicator;
+            double areaMultiplicator = colorBox.area/(2*MIN_OBJECT_AREA); //easier to modify later
+            cout <<"AreaMult: " << areaMultiplicator << endl;
+            moveVec.x += normalVec.x * lengthRatio * areaMultiplicator;
             moveVec.y += normalVec.y * lengthRatio * areaMultiplicator;
 
         //    cout << moveVec.x << " " << moveVec.y << endl;
@@ -71,15 +82,15 @@ void MainKlocki::getCommands(std::vector<Robot> robotVec, std::vector<ColorBox> 
     }
     moveVec.x = moveVec.x*1000;
     moveVec.y = -moveVec.y*1000;
-    if(moveVec.x > 1000){
+    if(moveVec.x > 1000.0){
         moveVec.x = 1000;
     }
-    if(moveVec.y > 1000){
+    if(moveVec.y > 1000.0){
         moveVec.y = 1000;
     }
+
     RobotCommands robotCommands = {robotId, moveVec.x, moveVec.y, 0};
 
-        cout << robotCommands.robotId << " " << robotCommands.xCentimetersPerSecond << " " << robotCommands.yCentimetersPerSecond << endl;
 
     emit robotCommandUpdate(robotCommands);
 }

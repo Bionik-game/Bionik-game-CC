@@ -25,6 +25,8 @@
 #include "Rozpoznawator/block.h"
 
 
+
+
 class MainRozpoznawator : public QThread
 {
     Q_OBJECT

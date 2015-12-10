@@ -7,6 +7,10 @@
 #include <opencv2/video.hpp>
 #include <opencv2/videoio.hpp>
 
+
+
+
+
 struct Robot
 {
     unsigned robotId;

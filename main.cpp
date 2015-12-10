@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     MainPriorytetyzator* priorytetyzator = new MainPriorytetyzator;
     Threader::ThreadKey threadKey = threader.runInThread(priorytetyzator);
 
-    std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN};
+    std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN, ColorBox::RED};
     MainKlocki* klocki = new MainKlocki(125, colorSet);
     threader.runInThread(klocki, threadKey);
 

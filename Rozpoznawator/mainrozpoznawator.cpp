@@ -1,13 +1,15 @@
 #include "mainrozpoznawator.h"
 
-const int FRAME_WIDTH = 800;
-const int FRAME_HEIGHT = 600;
 
-unsigned int MIN_OBJECT_AREA;
 
 using namespace  cv;
 using namespace aruco;
 
+
+const int FRAME_WIDTH = 800;
+const int FRAME_HEIGHT = 600;
+
+unsigned int MIN_OBJECT_AREA;
 
 aruco::MarkerDetector MainRozpoznawator::detector() const
 {
@@ -81,6 +83,15 @@ MainRozpoznawator::MainRozpoznawator()
     this->boardCorners.push_back(Point2i(FRAME_WIDTH,0));
     this->boardCorners.push_back(Point2i(FRAME_WIDTH,FRAME_HEIGHT));
     this->boardCorners.push_back(Point2i(0,FRAME_HEIGHT));
+
+    fstream file;
+    file.open("minimal_size_data.txt", ios::in);
+    if(!file.is_open()){
+        std::cout << "File not found" << endl;
+    }else
+        file >> MIN_OBJECT_AREA;
+
+
 
     ////////////////////////////////////////////////////////////////
 
@@ -488,6 +499,10 @@ void colourCalibCallback(int event, int x, int y, int flags, void* userdata) {  
 
             MIN_OBJECT_AREA = 0.5*moment.m00;
             cout << "MIN_OBJECT_AREA = " << MIN_OBJECT_AREA << endl;
+            fstream file;
+            file.open("minimal_size_data.txt", ios::out);
+            file.flush();
+            file << MIN_OBJECT_AREA << endl;
         }
 
 

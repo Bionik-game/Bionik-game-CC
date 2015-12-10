@@ -1,11 +1,11 @@
 #include "mainwalidator.h"
-
+#include "Common-utils/mapelements.h"
 #include <iostream>
 
 using namespace std;
 using namespace cv;
 
-#define MIN_DISTANCE_TO_WALL_PIXELS 170
+unsigned int MIN_DISTANCE_TO_WALL_PIXELS = 100;
 const int FRAME_WIDTH = 800;
 const int FRAME_HEIGHT = 600;
 
@@ -32,11 +32,13 @@ MainWalidator::MainWalidator()
     vec.x = -1.0;
     vec.y = 0.0;
     normalVectors.push_back(vec);
+        this->boardCornersVec.push_back(Point2i(-FRAME_WIDTH/2,-FRAME_HEIGHT/2));       //Lewy dolny
+     this->boardCornersVec.push_back(Point2i(FRAME_WIDTH/2,-FRAME_HEIGHT/2)); //Prawy dolny
+        this->boardCornersVec.push_back(Point2i(FRAME_WIDTH/2,FRAME_HEIGHT/2)); //Prawy gorny
+    this->boardCornersVec.push_back(Point2i(-FRAME_WIDTH/2,FRAME_HEIGHT/2));     //Lewy gorny
 
-    this->boardCornersVec.push_back(Point2i(0,0));     //Lewy gorny
-    this->boardCornersVec.push_back(Point2i(FRAME_WIDTH,0)); //Prawy gorny
-    this->boardCornersVec.push_back(Point2i(FRAME_WIDTH,FRAME_HEIGHT)); //Prawy dolny
-    this->boardCornersVec.push_back(Point2i(0,FRAME_HEIGHT));       //Lewy dolny
+
+
 
 
     cout << normalVectors.size() << endl;
@@ -88,26 +90,28 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
     vect2d velVector;
     vect2d correctionVector;
    // cout << polyCorners << endl;
-        for (i=10,j=1; i<polyCorners; ++i,j++) {
+        for (i=0,j=1; i<polyCorners; ++i,j++) {
           //  cout << "test" << endl;
             if(j > 3)
                    j = 0;
-            xi = this->boardCornersVec.at(i).x ;
-            xj = this->boardCornersVec.at(j).x ;
+        /*    xi = this->boardCornersVec.at(i).x ;
+            xj = this->boardCornersVec.at(j).x ;                            //Tymczasowa zmiana!
             yi = this->boardCornersVec.at(i).y ;
             yj = this->boardCornersVec.at(j).y ;
-
-            cout << "Poly:  " << polyCorners << endl;
+        */
+          //  cout << "Poly:  " << polyCorners << endl;
 
 
             velVector.x = robotCommand.xCentimetersPerSecond;
             velVector.y = robotCommand.yCentimetersPerSecond;
 
-           // cout<<velVector.x << " " << velVector.y << endl;
+            cout<<velVector.x << " " << velVector.y << endl;
 
-            double distToBorder = computeDistance(robot.xCentimeters,robot.yCentimeters,this->boardCornersVec.at(i),this->boardCornersVec.at(j));//calcDistPointToLine(this->boardCornersVec.at(i),this->boardCornersVec.at(j), Point2i(robot.xCentimeters,robot.yCentimeters));
-           // cout << "distance " << distToBorder << endl;
-            cout << "i: " << i << endl;
+
+
+           double distToBorder = computeDistance(robot.xCentimeters,robot.yCentimeters,this->boardCornersVec.at(i),this->boardCornersVec.at(j));//calcDistPointToLine(this->boardCornersVec.at(i),this->boardCornersVec.at(j), Point2i(robot.xCentimeters,robot.yCentimeters));
+          // double distToBorder = calcDistPointToLine(boardCornersVec.at(i), boardCornersVec.at(j), )
+
             normalVector = normalVectors.at(i);
             if( distToBorder < MIN_DISTANCE_TO_WALL_PIXELS ){
                 //Calculate vector normal to wall, facing outwardsn
@@ -116,9 +120,8 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
                 double length = sqrt(normalVector.x*normalVector.x + normalVector.y*normalVector.y);
                 normalVector.x = normalVector.x/length;
                 normalVector.y = normalVector.y/length;
-                */
-                //Calculate dot product of velocity vector and normal vector
 
+                //Calculate dot product of velocity vector and normal vector                                     //Tymczasowa zmiana!
              //   cout << normalVector.x << " " << normalVector.y << "    " << i << endl;
                 dotProduct = velVector.x*normalVector.x + velVector.y*normalVector.y;
                 //Correct the original vector
@@ -129,20 +132,39 @@ RobotCommands MainWalidator::correctionVelocityVector ( Robot robot , RobotComma
                 correctionVector.y = dotProduct*normalVector.y;
                 robotCommand.xCentimetersPerSecond -= correctionVector.x;
                 robotCommand.yCentimetersPerSecond -= correctionVector.y;
+                */
+                if( i == 0){
+                    if( robotCommand.yCentimetersPerSecond > 0 )
+                        robotCommand.yCentimetersPerSecond = 0;
+                }else if( i == 1){
+                    if( robotCommand.xCentimetersPerSecond > 0 )
+                        robotCommand.xCentimetersPerSecond = 0;
+                }else if( i == 2){
+                    if( robotCommand.yCentimetersPerSecond < 0 )
+                        robotCommand.yCentimetersPerSecond = 0;
+                }else if( i == 3){
+                    if( robotCommand.xCentimetersPerSecond < 0 )
+                        robotCommand.xCentimetersPerSecond = 0;
+                }
             }
          }
 
     // @mateusz: dostosowalem kod z mainklocki.cpp do walidatora, tam go usunalem
-   float robotAngleRad = robot.rotationRadians;
+    float robotAngleRad = robot.rotationRadians;
     float cs = cos(robotAngleRad);
     float sn = sin(robotAngleRad);
     float tempX = robotCommand.xCentimetersPerSecond*cs - robotCommand.yCentimetersPerSecond*sn;
     float tempY = robotCommand.xCentimetersPerSecond * sn + robotCommand.yCentimetersPerSecond * cs;
     robotCommand.xCentimetersPerSecond = tempX;
     robotCommand.yCentimetersPerSecond = tempY;
-    cout << "X: " <<tempX << endl;
-    cout << "Y: " <<tempY << endl;
     // @mateusz: koniec wstawionego kodu
+    if(robotCommand.xCentimetersPerSecond > 1000.0){
+        robotCommand.xCentimetersPerSecond = 1000;
+    }
+    if(robotCommand.yCentimetersPerSecond > 1000.0){
+        robotCommand.yCentimetersPerSecond = 1000;
+    }
+
     return robotCommand;
 }
 
@@ -175,5 +197,5 @@ void MainWalidator::robotCommandUpdateRaw(RobotCommands robotCommands)
 
 void MainWalidator::boardPos( std::vector<cv::Point2i> boardCorners) {
     this->boardCornersVec = boardCorners;
-    std::cout << this->boardCornersVec.at(0);
+
 }
