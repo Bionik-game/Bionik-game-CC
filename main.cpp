@@ -35,21 +35,23 @@ int main(int argc, char *argv[])
     MainRozpoznawator* rozpoznawator = new MainRozpoznawator;
     threader.runInThread(rozpoznawator);
 
-    MainPriorytetyzator* priorytetyzator = new MainPriorytetyzator;
-    Threader::ThreadKey threadKey = threader.runInThread(priorytetyzator);
+    std::set<ColorBox::Color> colorSetNiebieski = {ColorBox::BLUE, ColorBox::GREEN};
+    MainKlocki* klockiNiebieski = new MainKlocki(125, colorSetNiebieski);
+    Threader::ThreadKey threadKey = threader.runInThread(klockiNiebieski);
 
-    std::set<ColorBox::Color> colorSet = {ColorBox::BLUE, ColorBox::GREEN, ColorBox::RED};
-    MainKlocki* klocki = new MainKlocki(125, colorSet);
-    threader.runInThread(klocki, threadKey);
+    std::set<ColorBox::Color> colorSetCzerwony = {ColorBox::RED, ColorBox::GREEN};
+    MainKlocki* klockiCzerwony = new MainKlocki(175, colorSetCzerwony);
+    threader.runInThread(klockiCzerwony, threadKey);
 
-  //  MainJoystick* gamepadNiebieski = new MainJoystick(125, "/dev/gamepadNiebieski");
-   // threader.runInThread(gamepadNiebieski, threadKey);
+    MainWalidator* walidatorCzerwony = new MainWalidator;
+    threader.runInThread(walidatorCzerwony, threadKey);
 
-    MainWalidator* walidator = new MainWalidator;
-    threader.runInThread(walidator);
+    MainWalidator* walidatorNiebieski = new MainWalidator;
+    threader.runInThread(walidatorNiebieski, threadKey);
 
     QMap<unsigned, QString> ipAddresses;
     ipAddresses.insert(125 ,"192.168.0.20:30001");
+    ipAddresses.insert(175 ,"192.168.0.21:30001");
     MainKomunikacja* komunikacja = new MainKomunikacja(ipAddresses);
     threader.runInThread(komunikacja);
 
@@ -59,23 +61,23 @@ int main(int argc, char *argv[])
     /**
      * Wyświetlanie informacji w oknie aplikacji
      */
-//    QObject::connect(gamepadBionik, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsBionik);
-//    QObject::connect(gamepadCzerwony, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsCzerwony);
-//    QObject::connect(gamepadNiebieski, &MainJoystick::robotCommandUpdate, &window, &MainWindow::updateRobotCommandsNiebieski);
-    QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, &window, &MainWindow::updateRobotCommandsNiebieski);
+    QObject::connect(walidatorNiebieski, &MainWalidator::robotCommandUpdateCorrected, &window, &MainWindow::updateRobotCommandsNiebieski);
+    QObject::connect(walidatorCzerwony, &MainWalidator::robotCommandUpdateCorrected, &window, &MainWindow::updateRobotCommandsCzerwony);
 
     /**
      * Łączenie danych między wątkami
      */
-    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, priorytetyzator, &MainPriorytetyzator::gameState);
-    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, walidator, &MainWalidator::gameState);
-    QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsColors, klocki, &MainKlocki::getCommands);
-    QObject::connect(klocki, &MainKlocki::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
-   // QObject::connect(gamepadNiebieski, &MainJoystick::gamePadRequest, priorytetyzator, &MainPriorytetyzator::gamePadRequest);
-    //QObject::connect(priorytetyzator, &MainPriorytetyzator::getCommandsJoystick, gamepadNiebieski, &MainJoystick::getCommands);
-//    QObject::connect(gamepadNiebieski, &MainJoystick::robotCommandUpdate, walidator, &MainWalidator::robotCommandUpdateRaw);
-    QObject::connect(walidator, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
-    QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidator, &MainWalidator::boardPos);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidatorNiebieski, &MainWalidator::boardPos);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidatorCzerwony, &MainWalidator::boardPos);
+
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiNiebieski, &MainKlocki::getCommands);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiCzerwony, &MainKlocki::getCommands);
+
+    QObject::connect(klockiNiebieski, &MainKlocki::robotCommandUpdate, walidatorNiebieski, &MainWalidator::robotCommandUpdateRaw);
+    QObject::connect(klockiCzerwony, &MainKlocki::robotCommandUpdate, walidatorCzerwony, &MainWalidator::robotCommandUpdateRaw);
+
+    QObject::connect(walidatorNiebieski, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
+    QObject::connect(walidatorCzerwony, &MainWalidator::robotCommandUpdateCorrected, komunikacja, &MainKomunikacja::robotCommandUpdate);
 
     /**
      * Połączenia pomiędzy przyciskami w GUI a funkcjami Rozpoznawatora

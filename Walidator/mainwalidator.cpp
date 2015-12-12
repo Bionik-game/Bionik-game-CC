@@ -172,14 +172,11 @@ void MainWalidator::processData()
 {
     vector<Robot> robotsVec = dataCollector.get<std::vector<Robot>>(0);
     vector<ColorBox> boxesVec = dataCollector.get<std::vector<ColorBox>>(1);
-
-
     RobotCommands robotCommandsCorrected = dataCollector.get<RobotCommands>(2);
 
     for(int i = 0; i <robotsVec.size(); i++){
         robotCommandsCorrected = correctionVelocityVector(robotsVec.at(i), robotCommandsCorrected);
     }
-
 
     emit robotCommandUpdateCorrected(robotCommandsCorrected);
 }
