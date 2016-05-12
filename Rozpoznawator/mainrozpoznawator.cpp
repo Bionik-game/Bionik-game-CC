@@ -6,8 +6,8 @@ using namespace  cv;
 using namespace aruco;
 
 
-const int FRAME_WIDTH = 800;
-const int FRAME_HEIGHT = 600;
+const int FRAME_WIDTH = 640;
+const int FRAME_HEIGHT = 480;
 
 unsigned int MIN_OBJECT_AREA;
 
@@ -744,5 +744,3 @@ void MainRozpoznawator::mainWork()
 
    emit gameState(this->robotsinfo, this->colorBoxesInfo);
 }
-
-
