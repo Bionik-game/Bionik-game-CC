@@ -1,5 +1,7 @@
 #include "threader.h"
 
+#include <cassert>
+
 Threader::Threader()
 {
 }
@@ -13,7 +15,7 @@ Threader::~Threader()
         delete thread;
 }
 
-Threader::ThreadKey Threader::runInThread(QObject *object)
+void Threader::runInThread(QObject * object)
 {
     QThread* thread = new QThread();
     QObject::connect(this, &Threader::quitting, thread, &QThread::quit);
@@ -21,18 +23,19 @@ Threader::ThreadKey Threader::runInThread(QObject *object)
 
     object->moveToThread(thread);
     QObject::connect(thread, &QThread::finished, object, &QObject::deleteLater);
-
-    return ThreadKey(thread);
 }
 
-void Threader::runInThread(QObject *object, Threader::ThreadKey &threadKey)
+void Threader::runInThread(std::vector<QObject*> objects)
 {
-    QThread* thread = const_cast<QThread*>(threadKey.threadPointer);
-    if (!threads.contains(thread))
-        throw NoSuchThreadKeyException();
+    QThread* thread = new QThread();
+    QObject::connect(this, &Threader::quitting, thread, &QThread::quit);
+    threads.append(thread);
 
-    object->moveToThread(thread);
-    QObject::connect(thread, &QThread::finished, object, &QObject::deleteLater);
+    for(QObject* object : objects)
+    {
+        object->moveToThread(thread);
+        QObject::connect(thread, &QThread::finished, object, &QObject::deleteLater);
+    }
 }
 
 void Threader::start()
@@ -50,11 +53,4 @@ void Threader::wait()
 {
     for (QThread* thread : threads)
         thread->wait();
-}
-
-
-
-Threader::ThreadKey::ThreadKey(QThread *threadPointer)
-    : threadPointer(threadPointer)
-{
 }

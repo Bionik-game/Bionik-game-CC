@@ -13,17 +13,6 @@ private:
     QVector<QThread*> threads;
 
 public:
-    struct ThreadKey {
-        friend class Threader;
-    private:
-        ThreadKey(QThread* threadPointer);
-        const QThread* threadPointer;
-    };
-    class  NoSuchThreadKeyException : public std::exception {
-    public:
-        const char *what() const noexcept { return "Given ThreadKey does not belong to this Threader."; }
-    };
-
     Threader();
     ~Threader();
 
@@ -31,8 +20,16 @@ signals:
     void quitting();
 
 public slots:
-    ThreadKey runInThread(QObject* object);
-    void runInThread(QObject* object, ThreadKey& threadKey);
+    /**
+     * Funkcja uruchamia podany obiekt w osobnym wątku.
+     */
+    void runInThread(QObject* object);
+
+    /**
+     * Jak wyżej, z tym że jednocześnie uruchamia od razu kilka obiektów w tym samym, nowym wątku.
+     */
+    void runInThread(std::vector<QObject*> objects);
+
     void start();
     void quit();
     void wait();
