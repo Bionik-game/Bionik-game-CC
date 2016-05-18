@@ -23,36 +23,32 @@ int main(int argc, char *argv[])
      */
     MainWindow window;
 
-    /**
-     * Obiekty poniższych klas reprezentujących elementy naszego
-     * programu działają w swoim wątku wraz ze swoją pętlą zdarzeń,
-     * implementacją niezależną od pętli zdarzeń (odpowiednik main,
-     * to metoda run). Wyłączenie wątków nastąpi w destruktorze
-     * klasy Threader.
-     */
-    Threader threader;
 
     MainRozpoznawator* rozpoznawator = new MainRozpoznawator;
-    threader.runInThread(rozpoznawator);
 
     std::set<ColorBox::Color> colorSetNiebieski = {ColorBox::BLUE, ColorBox::GREEN};
     MainKlocki* klockiNiebieski = new MainKlocki(125, colorSetNiebieski);
-    Threader::ThreadKey threadKey = threader.runInThread(klockiNiebieski);
 
     std::set<ColorBox::Color> colorSetCzerwony = {ColorBox::RED, ColorBox::GREEN};
     MainKlocki* klockiCzerwony = new MainKlocki(175, colorSetCzerwony);
-    threader.runInThread(klockiCzerwony, threadKey);
 
     MainWalidator* walidatorCzerwony = new MainWalidator;
-    threader.runInThread(walidatorCzerwony, threadKey);
 
     MainWalidator* walidatorNiebieski = new MainWalidator;
-    threader.runInThread(walidatorNiebieski, threadKey);
 
     QMap<unsigned, QString> ipAddresses;
     ipAddresses.insert(125 ,"192.168.0.20:30001");
     ipAddresses.insert(175 ,"192.168.0.21:30001");
     MainKomunikacja* komunikacja = new MainKomunikacja(ipAddresses);
+
+    /**
+     * Obiekty powyższych klas reprezentujących elementy naszego
+     * programu działają w swoim wątku wraz ze swoją pętlą zdarzeń.
+     * Wyłączenie wątków nastąpi w destruktorze klasy Threader.
+     */
+    Threader threader;
+    threader.runInThread(rozpoznawator);
+    threader.runInThread({klockiNiebieski, klockiCzerwony, walidatorCzerwony, walidatorNiebieski});
     threader.runInThread(komunikacja);
 
 
@@ -67,11 +63,14 @@ int main(int argc, char *argv[])
     /**
      * Łączenie danych między wątkami
      */
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiNiebieski, &MainKlocki::getCommands);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiCzerwony, &MainKlocki::getCommands);
+
     QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidatorNiebieski, &MainWalidator::boardPos);
     QObject::connect(rozpoznawator, &MainRozpoznawator::boardPos, walidatorCzerwony, &MainWalidator::boardPos);
 
-    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiNiebieski, &MainKlocki::getCommands);
-    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, klockiCzerwony, &MainKlocki::getCommands);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, walidatorNiebieski, &MainWalidator::gameState);
+    QObject::connect(rozpoznawator, &MainRozpoznawator::gameState, walidatorCzerwony, &MainWalidator::gameState);
 
     QObject::connect(klockiNiebieski, &MainKlocki::robotCommandUpdate, walidatorNiebieski, &MainWalidator::robotCommandUpdateRaw);
     QObject::connect(klockiCzerwony, &MainKlocki::robotCommandUpdate, walidatorCzerwony, &MainWalidator::robotCommandUpdateRaw);
@@ -85,8 +84,9 @@ int main(int argc, char *argv[])
     QObject::connect(&window, &MainWindow::startColourConfiguration, rozpoznawator, &MainRozpoznawator::colourCalibration);
     QObject::connect(&window, &MainWindow::startBoardConfiguration, rozpoznawator, &MainRozpoznawator::boardConfiguration);
 
-     // Połączenia umożliwiające wyświetlanie obrazów z Rozpoznawatora w głównym oknie
-
+    /**
+     * Połączenia umożliwiające wyświetlanie obrazów z Rozpoznawatora w głównym oknie
+     */
     QObject::connect( rozpoznawator, &MainRozpoznawator::updateMainImage, &window, &MainWindow::updateMainImage);
     QObject::connect( rozpoznawator, &MainRozpoznawator::updateColourCalibImage, &window, &MainWindow::updateColourCalibImage ) ;
     QObject::connect( rozpoznawator, &MainRozpoznawator::updateBoardConfImage, &window, &MainWindow::updateBoardConfImage);

@@ -4,6 +4,57 @@
 #include <QObject>
 #include <exception>
 
+/**
+ * W tym pliku najważniejsza jest klasa DataCollector i jej publiczne metody "set" oraz "get".
+ * Idea tej klasy to synchronizacja sygnałów wiadomości. W momencie przyjścia pewnego podzbioru sygnałów,
+ * nalezy wywołać metodę "set". Kiedy wszystkie zadeklarowane w argumentach szablonu obiekty przyjdą,
+ * zostanie wysłany sygnał "allDataNew". W obsłudze tego sygnału można pobrać wiadomości z sygnałów
+ * metodą "get". Numery w nawiasie trójkątnym odpowiadają kolejności podania argumentów szablonu.
+ *
+ * Przykład:
+ *
+ * class ExampleDataCollector
+ * {
+ * private:
+ *      DataCollector<double, int, QString> dataCollector;
+ *
+ * public:
+ *      ExampleDataCollector()
+ *      {
+ *          QObject::connect(&dataCollector, &DataCollector::allDataNew(), this, &ExampleData::processData);
+ *      }
+ *
+ * public slots:
+ *      void doubleArrived(double data)
+ *      {
+ *          dataCollector.set(0, data);
+ *      }
+ *      void intArrived(int data)
+ *      {
+ *          dataCollector.set(1, data);
+ *      }
+ *      void qStringArrived(QString data)
+ *      {
+ *          dataCollector.set(2, data);
+ *      }
+ *
+ * private slots:
+ *      void processData()
+ *      {
+ *          double dataOne = dataCollector.get<double>(0);
+ *          int dataTwo = dataCollector.get<int>(1);
+ *          QString dataThree = dataCollector.get<QString>(2);
+ *
+ *          // Do something with data
+ *      }
+ * }
+ *
+ *
+ * QObject::connect(&dataCollector, &DataCollector::allDataNew, [](){
+ *
+ * })
+ */
+
 class SignalClass : public QObject
 {
     Q_OBJECT
@@ -26,7 +77,7 @@ template<typename T = LastTag, typename...Args>
 class DataCollector : public SignalClass
 {
     template<typename X>
-    friend class DataCollector<T, Args...>; //External class can access private methods of internal one
+    friend class DataCollector<T, Args...>; //Without this you cannot access private methods of attribute "dataCollector"
 private:
     template<typename S>
     class DataWrapper
@@ -43,6 +94,7 @@ private:
             : data(nullptr)
         {
         }
+
         ~DataWrapper()
         {
             if(data != nullptr)
