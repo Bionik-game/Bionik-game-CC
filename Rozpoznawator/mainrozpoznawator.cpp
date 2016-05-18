@@ -41,6 +41,15 @@ MainRozpoznawator::MainRozpoznawator()
 {
     /////////////////////// Camera capture setup
 
+    // Check device number. Important to open the camera.
+    QFileInfo info(videoDeviceAddress);
+    if(!info.isSymLink())
+      cout << "/dev/videoBionik is not a symLink!" << endl;
+    QString address = info.symLinkTarget();
+    cout << address.toStdString() << endl;
+    videoDeviceId = atoi(address.toStdString().c_str());
+    cout << "videoDeviceId: " << videoDeviceId << endl;
+
     if( this->cameraCapture.open(videoDeviceId) ){
         //set height and width of capture frame
         camera_found = true;

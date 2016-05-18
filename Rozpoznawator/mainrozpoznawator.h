@@ -11,6 +11,7 @@
 #include <QThread>
 #include <QVector>
 #include <QTimer>
+#include <QFileInfo>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -38,7 +39,8 @@ public:
     const unsigned int topRightBoardId = 1005;   // Id znaczników planszy
     const unsigned int bottomLeftBoardId = 428;
     const unsigned int bottomRightBoardId = 341;
-    const unsigned int videoDeviceId = 1;
+    unsigned int videoDeviceId = 1;
+    const QString videoDeviceAddress = "/dev/video0";
 
     std::vector<cv::Point2i> boardCorners;
 
