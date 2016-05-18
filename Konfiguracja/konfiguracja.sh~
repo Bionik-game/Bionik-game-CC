@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo 'Install video4linux'
+sudo apt-get install -y v4l-utils
+
+echo 'move file to rules.d'
+sudo mv 99-Bionik.rules /etc/udev/rules.d
+
+echo 'Unplug and pluge a camera'
+echo 'Press enter...'
+read -n 1 -s
+
+echo 'reload names'
+sudo udevadm control --reload
+
+echo 'Adjust resolution of camera'
+sudo v4l2-ctl -d /dev/video99 -v width=960,height=720
+
+echo 'List parameters...'
+v4l2-ctl -d /dev/video99 -V

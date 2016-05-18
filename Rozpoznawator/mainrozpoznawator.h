@@ -38,7 +38,7 @@ public:
     const unsigned int topRightBoardId = 1005;   // Id znaczników planszy
     const unsigned int bottomLeftBoardId = 428;
     const unsigned int bottomRightBoardId = 341;
-    const unsigned int videoDeviceId = 0;
+    const unsigned int videoDeviceId = 1;
 
     std::vector<cv::Point2i> boardCorners;
 

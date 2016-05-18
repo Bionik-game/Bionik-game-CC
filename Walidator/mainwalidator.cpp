@@ -6,8 +6,8 @@ using namespace std;
 using namespace cv;
 
 unsigned int MIN_DISTANCE_TO_WALL_PIXELS = 100;
-const int FRAME_WIDTH = 800;
-const int FRAME_HEIGHT = 600;
+const int FRAME_WIDTH = 640;
+const int FRAME_HEIGHT = 480;
 
 MainWalidator::MainWalidator()
 {
