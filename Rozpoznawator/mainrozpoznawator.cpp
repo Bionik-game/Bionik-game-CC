@@ -45,9 +45,12 @@ MainRozpoznawator::MainRozpoznawator()
     QFileInfo info(videoDeviceAddress);
     if(!info.isSymLink())
       cout << "/dev/videoBionik is not a symLink!" << endl;
-    QString address = info.symLinkTarget();
-    cout << address.toStdString() << endl;
-    videoDeviceId = atoi(address.toStdString().c_str());
+    string address = info.symLinkTarget().toStdString();
+    cout << address << endl;
+    for(int i = 0; i < address.length(); ++i) 
+      if (isdigit(address.c_str()[i]) ) 
+        videoDeviceId = atoi(address.c_str()+i);
+
     cout << "videoDeviceId: " << videoDeviceId << endl;
 
     if( this->cameraCapture.open(videoDeviceId) ){
